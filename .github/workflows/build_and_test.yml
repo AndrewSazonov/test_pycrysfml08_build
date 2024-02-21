@@ -2,6 +2,14 @@ name: Build and test
 
 on: [push, pull_request]
 
+env:
+  PROJECTS_DIR: $GITHUB_WORKSPACE
+  CRYSFML_PROJECT: CrysFML2008
+  PYCRYSFML_PROJECT: PyCrysFML08
+  CRYSFML_INSTALL_DIR: $PROJECTS_DIR/${CRYSFML_PROJECT}_install
+  PYCRYSFML_INSTALL_DIR: $PROJECTS_DIR/${PYCRYSFML_PROJECT}_install
+
+
 jobs:
   build-and-test:
     timeout-minutes: 30
@@ -31,61 +39,64 @@ jobs:
           echo "PROJECTS_DIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
           echo "CRYSFML_PROJECT=CrysFML2008" >> $GITHUB_ENV
           echo "PYCRYSFML_PROJECT=PyCrysFML08" >> $GITHUB_ENV
-          echo "CRYSFML_INSTALL_DIR=$PROJECTS_DIR/${CRYSFML_PROJECT}_install" >> $GITHUB_ENV
-          echo "PYCRYSFML_INSTALL_DIR=$PROJECTS_DIR/${PYCRYSFML_PROJECT}_install/pycrysfml08" >> $GITHUB_ENV
+          echo "CRYSFML_INSTALL_DIR=${{ env.PROJECTS_DIR }}/${{ env.CRYSFML_PROJECT }}_install" >> $GITHUB_ENV
+          echo "PYCRYSFML_INSTALL_DIR=${{ env.PROJECTS_DIR }}/${{ env.PYCRYSFML_PROJECT }}_install/pycrysfml08" >> $GITHUB_ENV
+          echo "LIBPYTHON=`python3-config --ldflags --embed`" >> $GITHUB_ENV
 
       - name: Install Python dependences
-        run: python -m pip install numpy pytest
+        run: |
+          python3-config --ldflags --embed
+          python -m pip install numpy pytest
 
       - name: Install OS-specific dependences (macOS)
         if: runner.os == 'macOS'
         run: |
           brew reinstall gcc  # to add gfortran
 
-      - name: Download $CRYSFML_PROJECT (master branch)
+      - name: Download ${{ env.CRYSFML_PROJECT }} (master branch)
         run: |
-          cd $PROJECTS_DIR
-          git clone --single-branch --branch master https://code.ill.fr/rodriguez-carvajal/$CRYSFML_PROJECT
+          cd ${{ env.PROJECTS_DIR }}
+          git clone --single-branch --branch master https://code.ill.fr/rodriguez-carvajal/${{ env.CRYSFML_PROJECT }}
 
-      - name: Build $CRYSFML_PROJECT using CMake
+      - name: Build ${{ env.CRYSFML_PROJECT }} using CMake
         run: |
-          cd $PROJECTS_DIR/$CRYSFML_PROJECT
+          cd ${{ env.PROJECTS_DIR }}/${{ env.CRYSFML_PROJECT }}
           mkdir build
           cd build
-          cmake -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=gfortran -DCMAKE_INSTALL_PREFIX=$CRYSFML_INSTALL_DIR ..
+          cmake -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=gfortran -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_INSTALL_DIR }} ..
           cmake --build . -- -j
           cmake --install .
 
-      - name: Download $PYCRYSFML_PROJECT (develop branch)
+      - name: Download ${{ env.PYCRYSFML_PROJECT }} (develop branch)
         run: |
-          cd $PROJECTS_DIR
-          git clone --single-branch --branch develop https://code.ill.fr/scientific-software/$PYCRYSFML_PROJECT
+          cd ${{ env.PROJECTS_DIR }}
+          git clone --single-branch --branch develop https://code.ill.fr/scientific-software/${{ env.PYCRYSFML_PROJECT }}
 
-      - name: Build $PYCRYSFML_PROJECT (Linux)
+      - name: Build ${{ env.PYRYSFML_PROJECT }} (Linux)
         if: runner.os == 'Linux'
         run: |
-          mkdir -p $PYCRYSFML_INSTALL_DIR
-          cd $PROJECTS_DIR/$PYCRYSFML_PROJECT/src
-          gfortran -cpp -std=f2008 -ffree-line-length-0 -fPIC -c py_cfml_profiles.f90 -I $CRYSFML_INSTALL_DIR/include
-          gfortran -shared -o py_cfml_profiles.so py_cfml_profiles.o -L $CRYSFML_INSTALL_DIR/lib -l crysfml08
-          mv py_cfml_profiles.so $PYCRYSFML_INSTALL_DIR
+          mkdir -p ${{ env.PYCRYSFML_INSTALL_DIR }}
+          cd ${{ env.PROJECTS_DIR }}/${{ env.PYCRYSFML_PROJECT }}/src
+          gfortran -cpp -std=f2008 -ffree-line-length-0 -fPIC -c py_cfml_profiles.f90 -I ${{ env.CRYSFML_INSTALL_DIR }}/include
+          gfortran -shared -o py_cfml_profiles.so py_cfml_profiles.o -L ${{ env.CRYSFML_INSTALL_DIR }}/lib -l crysfml08
+          mv py_cfml_profiles.so ${{ env.PYCRYSFML_INSTALL_DIR }}
           rm *.o
           rm *.mod
           rm *.smod
 
-      - name: Build $PYCRYSFML_PROJECT (macOS)
+      - name: Build ${{ env.PYRYSFML_PROJECT }} (macOS)
         if: runner.os == 'macOS'
         run: |
-          mkdir -p $PYCRYSFML_INSTALL_DIR
-          cd $PROJECTS_DIR/$PYCRYSFML_PROJECT/src
-          gfortran -cpp -std=f2008 -ffree-line-length-0 -fPIC -c py_cfml_profiles.f90 -I $CRYSFML_INSTALL_DIR/include
-          gfortran -shared -o py_cfml_profiles.so py_cfml_profiles.o -L $CRYSFML_INSTALL_DIR/lib -l crysfml08 `python3-config --ldflags --embed`
-          mv py_cfml_profiles.so $PYCRYSFML_INSTALL_DIR
+          mkdir -p ${{ env.PYCRYSFML_INSTALL_DIR }}
+          cd ${{ env.PROJECTS_DIR }}/${{ env.PYCRYSFML_PROJECT }}/src
+          gfortran -cpp -std=f2008 -ffree-line-length-0 -fPIC -c py_cfml_profiles.f90 -I ${{ env.CRYSFML_INSTALL_DIR }}/include
+          gfortran -shared -o py_cfml_profiles.so py_cfml_profiles.o -L ${{ env.CRYSFML_INSTALL_DIR }}/lib -l crysfml08 `python3-config --ldflags --embed`
+          mv py_cfml_profiles.so ${{ env.PYCRYSFML_INSTALL_DIR }}
           rm *.o
           rm *.mod
           rm *.smod
 
       - name: Run tests
         run: |
-          cd $PROJECTS_DIR
+          cd ${{ env.PROJECTS_DIR }}
           pytest tests/ -vv
