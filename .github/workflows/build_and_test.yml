@@ -19,9 +19,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-12]  # [ubuntu-20.04, macos-12, windows-2022]
+        os: [ubuntu-22.04]  # [ubuntu-20.04, macos-12, windows-2022]
+        build_system: [cmake, fpm]
 
     steps:
+      - name: Debug ${{ matrix.build_system }}
+        if: matrix.build_system == 'cmake'
+        run: echo 'CMAKE'
+
+      - name: Debug ${{ matrix.build_system }}
+        if: matrix.build_system == 'fpm'
+        run: echo 'FPM'
+
       - name: Check-out repository
         uses: actions/checkout@v3
 
@@ -58,10 +67,10 @@ jobs:
           brew reinstall gcc  # to add gfortran
           brew install python-colorama
 
-      - name: Download ${{ env.CRYSFML_PROJECT }} (master branch)
-        run: git clone --single-branch --branch master https://code.ill.fr/rodriguez-carvajal/${{ env.CRYSFML_PROJECT }}.git
+      - name: Download ${{ env.CRYSFML_PROJECT }} (fpm_macos branch)
+        run: git clone --single-branch --branch fpm_macos https://code.ill.fr/rodriguez-carvajal/${{ env.CRYSFML_PROJECT }}.git
 
-      - name: Build ${{ env.CRYSFML_PROJECT }} using CMake
+      - name: Build ${{ env.CRYSFML_PROJECT }} using CMake ${{ matrix.build_system }}
         run: |
           cd ${{ env.PROJECTS_DIR }}/${{ env.CRYSFML_PROJECT }}
           mkdir build
@@ -74,10 +83,9 @@ jobs:
         run: git clone --single-branch --branch develop https://code.ill.fr/scientific-software/${{ env.PYCRYSFML_PROJECT }}.git
 
       - name: Build ${{ env.PYCRYSFML_PROJECT }}
-        if: runner.os == 'macOS'
         run: |
           cd ${{ env.PROJECTS_DIR }}/${{ env.PYCRYSFML_PROJECT }}/src
-          gfortran -cpp -std=f2008 -ffree-line-length-0 -fPIC -c py_cfml_profiles.f90 -I ${{ env.CRYSFML_INSTALL_DIR }}/include
+          gfortran -std=f2008 -ffree-line-length-0 -fPIC -c py_cfml_profiles.f90 -I ${{ env.CRYSFML_INSTALL_DIR }}/include
           gfortran -shared -o py_cfml_profiles.so py_cfml_profiles.o -L ${{ env.CRYSFML_INSTALL_DIR }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
           mkdir -p ${{ env.PYCRYSFML_INSTALL_DIR }}/pycrysfml08
           mv py_cfml_profiles.so ${{ env.PYCRYSFML_INSTALL_DIR }}/pycrysfml08
