@@ -1,0 +1,62 @@
+name: Build and test
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    timeout-minutes: 30
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04]  # [ubuntu-20.04, macos-12, windows-2022]
+
+    steps:
+      - name: Check-out repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python environment
+        uses: actions/setup-python@v4
+        with:
+            python-version: 3.11
+
+      - name: Upgrade PIP
+        run: python -m pip install --upgrade pip
+
+      - name: Install Python dependences
+        run: python -m pip install numpy pytest
+
+      - name: Install OS-specific dependences (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew reinstall gcc  # to add gfortran
+
+      - name: Download CrysFML2008 (master branch)
+        run: git clone --single-branch --branch master https://code.ill.fr/rodriguez-carvajal/CrysFML2008
+
+      - name: Build CrysFML2008 using CMake
+        run: |
+          cd CrysFML2008
+          mkdir build
+          cd build
+          cmake -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=gfortran -DCMAKE_INSTALL_PREFIX=CrysFML2008_install ..
+          cmake --build . -- -j
+          cmake --install .
+
+      - name: Download PyCrysFML08 (develop branch)
+        run: git clone --single-branch --branch develop https://code.ill.fr/scientific-software/PyCrysFML08
+
+      - name: Build PyCrysFML08
+        run: |
+          mkdir -p PyCrysFML08_install/pycrysfml08
+          gfortran -cpp -std=f2008 -ffree-line-length-0 -fPIC -c PyCrysFML08/src/py_cfml_profiles.f90 -I CrysFML2008_install/include
+          gfortran -shared -o py_cfml_profiles.so py_cfml_profiles.o `python3-config --ldflags --embed` -L CrysFML2008_install/lib -l crysfml08
+          mv py_cfml_profiles.so PyCrysFML08_install/pycrysfml08
+          rm *.o
+          rm *.mod
+          rm *.smod
+
+      - name: Run tests
+        run: pytest tests/ -vv
