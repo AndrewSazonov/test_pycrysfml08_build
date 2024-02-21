@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04]  # [ubuntu-20.04, macos-12, windows-2022]
+        os: [ubuntu-20.04, macos-12]  # [ubuntu-20.04, macos-12, windows-2022]
 
     steps:
       - name: Check-out repository
@@ -25,6 +25,15 @@ jobs:
       - name: Upgrade PIP
         run: python -m pip install --upgrade pip
 
+      - name: Declare env variables on push and pull_request
+        shell: bash
+        run: |
+          echo "PROJECTS_DIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+          echo "CRYSFML_PROJECT=CrysFML2008" >> $GITHUB_ENV
+          echo "PYCRYSFML_PROJECT=PyCrysFML08" >> $GITHUB_ENV
+          echo "CRYSFML_INSTALL_DIR=$PROJECTS_DIR/${CRYSFML_PROJECT}_install" >> $GITHUB_ENV
+          echo "PYCRYSFML_INSTALL_DIR=$PROJECTS_DIR/${PYCRYSFML_PROJECT}_install/pycrysfml08" >> $GITHUB_ENV
+
       - name: Install Python dependences
         run: python -m pip install numpy pytest
 
@@ -33,30 +42,50 @@ jobs:
         run: |
           brew reinstall gcc  # to add gfortran
 
-      - name: Download CrysFML2008 (master branch)
-        run: git clone --single-branch --branch master https://code.ill.fr/rodriguez-carvajal/CrysFML2008
-
-      - name: Build CrysFML2008 using CMake
+      - name: Download $CRYSFML_PROJECT (master branch)
         run: |
-          cd CrysFML2008
+          cd $PROJECTS_DIR
+          git clone --single-branch --branch master https://code.ill.fr/rodriguez-carvajal/$CRYSFML_PROJECT
+
+      - name: Build $CRYSFML_PROJECT using CMake
+        run: |
+          cd $PROJECTS_DIR/$CRYSFML_PROJECT
           mkdir build
           cd build
-          cmake -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=gfortran -DCMAKE_INSTALL_PREFIX=CrysFML2008_install ..
+          cmake -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=gfortran -DCMAKE_INSTALL_PREFIX=$CRYSFML_INSTALL_DIR ..
           cmake --build . -- -j
           cmake --install .
 
-      - name: Download PyCrysFML08 (develop branch)
-        run: git clone --single-branch --branch develop https://code.ill.fr/scientific-software/PyCrysFML08
-
-      - name: Build PyCrysFML08
+      - name: Download $PYCRYSFML_PROJECT (develop branch)
         run: |
-          mkdir -p PyCrysFML08_install/pycrysfml08
-          gfortran -cpp -std=f2008 -ffree-line-length-0 -fPIC -c PyCrysFML08/src/py_cfml_profiles.f90 -I CrysFML2008_install/include
-          gfortran -shared -o py_cfml_profiles.so py_cfml_profiles.o `python3-config --ldflags --embed` -L CrysFML2008_install/lib -l crysfml08
-          mv py_cfml_profiles.so PyCrysFML08_install/pycrysfml08
+          cd $PROJECTS_DIR
+          git clone --single-branch --branch develop https://code.ill.fr/scientific-software/$PYCRYSFML_PROJECT
+
+      - name: Build $PYCRYSFML_PROJECT (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p $PYCRYSFML_INSTALL_DIR
+          cd $PROJECTS_DIR/$PYCRYSFML_PROJECT/src
+          gfortran -cpp -std=f2008 -ffree-line-length-0 -fPIC -c py_cfml_profiles.f90 -I $CRYSFML_INSTALL_DIR/include
+          gfortran -shared -o py_cfml_profiles.so py_cfml_profiles.o -L $CRYSFML_INSTALL_DIR/lib -l crysfml08
+          mv py_cfml_profiles.so $PYCRYSFML_INSTALL_DIR
+          rm *.o
+          rm *.mod
+          rm *.smod
+
+      - name: Build $PYCRYSFML_PROJECT (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p $PYCRYSFML_INSTALL_DIR
+          cd $PROJECTS_DIR/$PYCRYSFML_PROJECT/src
+          gfortran -cpp -std=f2008 -ffree-line-length-0 -fPIC -c py_cfml_profiles.f90 -I $CRYSFML_INSTALL_DIR/include
+          gfortran -shared -o py_cfml_profiles.so py_cfml_profiles.o -L $CRYSFML_INSTALL_DIR/lib -l crysfml08 `python3-config --ldflags --embed`
+          mv py_cfml_profiles.so $PYCRYSFML_INSTALL_DIR
           rm *.o
           rm *.mod
           rm *.smod
 
       - name: Run tests
-        run: pytest tests/ -vv
+        run: |
+          cd $PROJECTS_DIR
+          pytest tests/ -vv
