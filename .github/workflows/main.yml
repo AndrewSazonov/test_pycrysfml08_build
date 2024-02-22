@@ -101,8 +101,7 @@ jobs:
         run: |
           cd ${{ env.PROJECTS_DIR }}/${{ env.PYCRYSFML_PROJECT }}/src
           mkdir -p ${{ env.PYCRYSFML_INSTALL_DIR }}/pycrysfml08
-          for name in py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom
-          do
+          for name in py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom; do
             gfortran -std=f2008 -ffree-line-length-0 -fPIC -c $name.f90 -I ${{ env.CRYSFML_INSTALL_DIR }}/include
             gfortran -shared -o $name.so $name.o -L ${{ env.CRYSFML_INSTALL_DIR }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
             mv $name.so ${{ env.PYCRYSFML_INSTALL_DIR }}/pycrysfml08
