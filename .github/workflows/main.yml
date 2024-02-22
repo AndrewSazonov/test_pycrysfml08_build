@@ -56,7 +56,7 @@ jobs:
           echo "PYCRYSFML_INSTALL_DIR=${{ env.PROJECTS_DIR }}/${{ env.PYCRYSFML_PROJECT }}_install" >> $GITHUB_ENV
 
       - name: Install Python dependences
-        run: python -m pip install numpy pytest
+        run: python -m pip install numpy pytest deepdiff
 
       - name: Install OS-specific dependences (macOS)
         if: runner.os == 'macOS'
