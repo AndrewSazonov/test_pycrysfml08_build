@@ -21,10 +21,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04]  # [ubuntu-22.04, macos-12, windows-2022]
+        os: [ubuntu-22.04, macos-12]  # [ubuntu-22.04, macos-12, windows-2022]
         build_system: [cmake]  # [cmake, fpm]
         compiler: [gfortran]  # [gfortran, ifx]
         include:
+          - os: macos-12
+            build_system: fpm
+            compiler: gfortran
           - os: ubuntu-22.04
             build_system: cmake
             compiler: ifx
