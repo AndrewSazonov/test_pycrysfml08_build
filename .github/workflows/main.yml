@@ -70,7 +70,8 @@ jobs:
         run: |
           brew reinstall gcc  # to add gfortran
           gfortran --version
-          brew install llvm libomp  # ??? OpenMP for parallel compilation in FPM
+          brew install llvm  # ??? OpenMP for parallel compilation in FPM
+          brew reinstall libomp  # ??? OpenMP for parallel compilation in FPM
 
       - name: Install OS-specific dependences (Linux + ifx)
         if: runner.os == 'Linux' && matrix.compiler == 'ifx'
