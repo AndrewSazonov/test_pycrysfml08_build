@@ -1,4 +1,4 @@
-[![](http://github-actions.40ants.com/AndrewSazonov/test_pycrysfml08_build/matrix.svg)](https://github.com/AndrewSazonov/test_pycrysfml08_build)
+[![](http://github-actions.40ants.com/AndrewSazonov/test_pycrysfml08_build/matrix.svg)](https://github.com/AndrewSazonov/test_pycrysfml08_build/actions)
 
 This is a repository for testing the build process of both the fortran crystallographic library [CrysFML2008](https://code.ill.fr/rodriguez-carvajal/CrysFML2008) and its python interface [PyCrysFML08](https://code.ill.fr/scientific-software/PyCrysFML08).
 
