@@ -19,8 +19,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-12]  # [ubuntu-20.04, macos-12, windows-2022]
-        build_system: [cmake, fpm]
+        os: [ubuntu-22.04]  # [ubuntu-22.04, macos-12, windows-2022]
+        build_system: [fpm]  # [cmake, fpm]
 
     steps:
       - name: Check-out repository
