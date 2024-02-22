@@ -22,12 +22,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, macos-12]  # [ubuntu-22.04, macos-12, windows-2022]
-        build_system: [cmake]  # [cmake, fpm]
+        build_system: [cmake, fpm]  # [cmake, fpm]
         compiler: [gfortran]  # [gfortran, ifx]
         include:
-          - os: macos-12
-            build_system: fpm
-            compiler: gfortran
           - os: ubuntu-22.04
             build_system: fpm
             compiler: ifx
@@ -66,7 +63,13 @@ jobs:
           fi
 
       - name: Install Python dependences
-        run: python -m pip install numpy pytest deepdiff fpm
+        run: python -m pip install numpy pytest deepdiff
+
+      - name: Install FPM
+        if: matrix.build_system == 'fpm'
+        run: |
+          python -m pip install fpm
+          fpm --version
 
       - name: Install OS-specific dependences (macOS)
         if: runner.os == 'macOS' && matrix.compiler == 'gfortran'
@@ -74,16 +77,7 @@ jobs:
           brew reinstall gcc  # to add gfortran
           gfortran --version
           brew tap fortran-lang/homebrew-fortran
-          # brew install fpm
-          # fpm --version
           # brew install llvm libomp  # OpenMP for parallel compilation in FPM
-
-      - name: Install OS-specific dependences (Linux + FPM)
-        if: runner.os == 'Linux' && matrix.build_system == 'fpm'
-        run: |
-          # sudo apt-get install ruby ruby-dev rubygems build-essential  # needed for FPM
-          # sudo gem install fpm  # FPM
-          fpm --version
 
       - name: Install OS-specific dependences (Linux + ifx)
         if: runner.os == 'Linux' && matrix.compiler == 'ifx'
