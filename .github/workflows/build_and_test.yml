@@ -19,18 +19,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04]  # [ubuntu-20.04, macos-12, windows-2022]
+        os: [macos-12]  # [ubuntu-20.04, macos-12, windows-2022]
         build_system: [cmake, fpm]
 
     steps:
-      - name: Debug ${{ matrix.build_system }}
-        if: matrix.build_system == 'cmake'
-        run: echo 'CMAKE'
-
-      - name: Debug ${{ matrix.build_system }}
-        if: matrix.build_system == 'fpm'
-        run: echo 'FPM'
-
       - name: Check-out repository
         uses: actions/checkout@v3
 
@@ -65,12 +57,23 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew reinstall gcc  # to add gfortran
-          brew install python-colorama
+          gfortran --version
+          brew tap fortran-lang/homebrew-fortran
+          brew install fpm
+          fpm --version
+
+      - name: Install OS-specific dependences (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install ruby ruby-dev rubygems build-essential  # needed for FPM
+          sudo gem install fpm  # FPM
+          fpm --version
 
       - name: Download ${{ env.CRYSFML_PROJECT }} (fpm_macos branch)
         run: git clone --single-branch --branch fpm_macos https://code.ill.fr/rodriguez-carvajal/${{ env.CRYSFML_PROJECT }}.git
 
-      - name: Build ${{ env.CRYSFML_PROJECT }} using CMake ${{ matrix.build_system }}
+      - name: Build ${{ env.CRYSFML_PROJECT }} using CMake
+        if: matrix.build_system == 'cmake'
         run: |
           cd ${{ env.PROJECTS_DIR }}/${{ env.CRYSFML_PROJECT }}
           mkdir build
@@ -78,6 +81,17 @@ jobs:
           cmake -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=gfortran -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_INSTALL_DIR }} ..
           cmake --build . -- -j
           cmake --install .
+
+      - name: Build ${{ env.CRYSFML_PROJECT }} using FPM
+        if: matrix.build_system == 'fpm'
+        run: |
+          cd ${{ env.PROJECTS_DIR }}/${{ env.CRYSFML_PROJECT }}
+          echo '* Run build script'
+          ./make_CrysFML_fpm.sh gfortran
+          echo '* Move build'
+          pwd
+          ls -l
+          mv gfortran_release ${{ env.CRYSFML_INSTALL_DIR }}
 
       - name: Download ${{ env.PYCRYSFML_PROJECT }} (develop branch)
         run: git clone --single-branch --branch develop https://code.ill.fr/scientific-software/${{ env.PYCRYSFML_PROJECT }}.git
