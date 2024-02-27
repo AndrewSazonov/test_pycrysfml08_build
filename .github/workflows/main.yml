@@ -37,7 +37,7 @@ jobs:
       - name: Declare env variables (independent)
         shell: bash
         run: |
-          echo "PROJECTS_DIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+          echo "PROJECTS_DIR=`pwd`" >> $GITHUB_ENV
           echo "CRYSFML_PROJECT=crysfml08" >> $GITHUB_ENV
           echo "PYCRYSFML_PROJECT=pycrysfml08" >> $GITHUB_ENV
           echo "DIST_PACKAGE_NAME=pycrysfml08" >> $GITHUB_ENV
