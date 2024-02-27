@@ -37,7 +37,7 @@ jobs:
       - name: Declare env variables (independent)
         shell: bash
         run: |
-          echo "PROJECTS_DIR=`pwd`" >> $GITHUB_ENV
+          echo "PROJECTS_DIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
           echo "CRYSFML_PROJECT=crysfml08" >> $GITHUB_ENV
           echo "PYCRYSFML_PROJECT=pycrysfml08" >> $GITHUB_ENV
           echo "DIST_PACKAGE_NAME=pycrysfml08" >> $GITHUB_ENV
@@ -127,25 +127,29 @@ jobs:
             ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.f90 -I ${{ env.CRYSFML_DIST }}/include
             echo "### ${{ matrix.compiler }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
             ${{ matrix.compiler }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
-            echo "### mv $n.so ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}"
-            mv $n.so ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}
-            echo '### ls -l ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}'
-            ls -l ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}
+            echo "### mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
+            mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+            echo '### ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
+            ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           done
 
       - name: Build PyCrysFML modules one by one (Windows)
         if: runner.os == 'Windows'
         shell: cmd
         run: |
-          echo '### mkdir -p ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
-          mkdir -p ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+          echo '### mkdir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
+          mkdir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           echo '### cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src'
           cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src
           for %%n in (py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom) do (
-            echo '### ${{ matrix.compiler }} -shared -o %%n.pyd %%n.f90 ${{ env.COMPILER_OPTIONS }} -I ${{ env.CRYSFML_DIST }}/include -L ${{ env.CRYSFML_DIST }}/lib -lCrysFML08 ${{ env.LIBPYTHON }}'
-            ${{ matrix.compiler }} -shared -o %%n.pyd %%n.f90 ${{ env.COMPILER_OPTIONS }} -I ${{ env.CRYSFML_DIST }}/include -L ${{ env.CRYSFML_DIST }}/lib -lCrysFML08 ${{ env.LIBPYTHON }}
-            echo '### move %%n.pyd ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}'
-            move %%n.pyd ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}
+            echo '### ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}/include'
+            ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}/include
+            echo '### ${{ matrix.compiler }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}'
+            ${{ matrix.compiler }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
+            echo '### move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
+            move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+            echo '### dir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
+            dir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           )
 
       - name: Build powder_mod module (Linux + macOS)
