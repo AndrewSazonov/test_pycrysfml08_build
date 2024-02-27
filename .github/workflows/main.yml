@@ -190,5 +190,20 @@ jobs:
           echo '### python3 -m pip install "${{ env.DIST_PACKAGE_NAME }}[dev]" --find-links=${{ env.PYCRYSFML_WHEEL }}'
           python3 -m pip install "${{ env.DIST_PACKAGE_NAME }}[dev]" --find-links=${{ env.PYCRYSFML_WHEEL }}
 
+      - name: Debug
+        run: |
+          if [[ '${{ runner.os }}' == 'macOS' ]]; then
+            echo "### ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}"
+            ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}
+            echo "### ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases"
+            ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases
+          fi
+          if [[ '${{ runner.os }}' == 'Linux' ]]; then
+            echo "### ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}"
+            ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}
+            echo "### ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases"
+            ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases
+          fi
+
       - name: Run tests
         run: pytest tests/ -vv
