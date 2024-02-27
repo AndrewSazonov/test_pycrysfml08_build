@@ -56,8 +56,8 @@ jobs:
           echo "PYCRYSFML_DIST=${{ env.PROJECTS_DIR }}/${{ env.PYCRYSFML_PROJECT }}_dist" >> $GITHUB_ENV
           echo "PYCRYSFML_WHEEL=${{ env.PROJECTS_DIR }}/${{ env.PYCRYSFML_PROJECT }}_wheel" >> $GITHUB_ENV
           if [[ '${{ runner.os }}' == 'macOS' ]]; then
-            echo "LIBPYTHON=-L/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/config-3.11-darwin -lpython3.11" >> $GITHUB_ENV
             echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)" >> $GITHUB_ENV  # needed because of `brew reinstall gcc`
+            echo "LIBPYTHON=-L/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/config-3.11-darwin -lpython3.11" >> $GITHUB_ENV
           fi
           if [[ '${{ runner.os }}' == 'Linux' && '${{ matrix.compiler }}' == 'ifort' ]]; then
             echo "COMPILER_OPTIONS=-fpp -fPIC" >> $GITHUB_ENV
@@ -66,9 +66,8 @@ jobs:
             echo "COMPILER_OPTIONS=-cpp -ffree-line-length-none -fPIC" >> $GITHUB_ENV
           fi
           if [[ '${{ runner.os }}' == 'Windows' ]]; then
+            echo "CMAKE_GENERATOR=-G 'NMake Makefiles'" >> $GITHUB_ENV
             echo "LIBPYTHON=${{ env.Python_ROOT_DIR }}\\libs\\python311.lib" >> $GITHUB_ENV
-            #echo "COMPILER_OPTIONS= -std=f2008 -ffree-line-length-none -fPIC" >> $GITHUB_ENV
-            echo "COMPILER_OPTIONS= -ffree-line-length-none -fPIC" >> $GITHUB_ENV
           fi
 
       - name: Install OS-specific dependences (Windows)
@@ -97,31 +96,15 @@ jobs:
       - name: Download CrysFML (powder_mod_fix branch)
         run: git clone --single-branch --branch powder_mod_fix https://code.ill.fr/rodriguez-carvajal/crysfml2008.git ${{ env.CRYSFML_REPO }}
 
-      - name: Build CrysFML using CMake (Linux + macOS)
-        if: matrix.build_system == 'cmake' && (runner.os == 'Linux' || runner.os == 'macOS')
+      - name: Build CrysFML using CMake
+        if: matrix.build_system == 'cmake'
         run: |
-          echo '### cmake -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }}  -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}'
-          cmake -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }}  -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}
-          echo '### cmake --build ${{ env.CRYSFML_BUILD }} --parallel'
-          cmake --build ${{ env.CRYSFML_BUILD }} --parallel
-          echo '### cmake --install ${{ env.CRYSFML_BUILD }}'
-          cmake --install ${{ env.CRYSFML_BUILD }}
-
-      - name: Build CrysFML using CMake (Windows)
-        if: matrix.build_system == 'cmake' && runner.os == 'Windows'
-        run: |
-          echo '### cmake -G "NMake Makefiles" -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}'
+          echo '### cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}'
           cmake -G "NMake Makefiles" -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}
-          echo '### cd ${{ env.CRYSFML_BUILD }}'
           echo '### cmake --build ${{ env.CRYSFML_BUILD }} --parallel'
           cmake --build ${{ env.CRYSFML_BUILD }} --parallel
           echo '### cmake --install ${{ env.CRYSFML_BUILD }}'
           cmake --install ${{ env.CRYSFML_BUILD }}
-          #cd ${{ env.CRYSFML_BUILD }}
-          #echo '### nmake'
-          #nmake
-          #echo '### nmake install'
-          #nmake install
 
       - name: Download PyCrysFML (develop branch)
         run: git clone --single-branch --branch develop https://code.ill.fr/scientific-software/pycrysfml08.git ${{ env.PYCRYSFML_REPO }}
