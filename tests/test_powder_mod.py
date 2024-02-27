@@ -9,13 +9,14 @@ from numpy.testing import assert_almost_equal
 from pycrysfml08 import powder_mod
 
 
-os.environ['FULLPROF'] = os.path.dirname(powder_mod.__file__)  # access to Databases/magnetic_data.txt
+os.environ['CRYSFML_DB'] = os.path.join(os.path.dirname(powder_mod.__file__), 'Databases')  # access to Databases/magnetic_data.txt
 
 STUDY_DICT = {
   "phases": [
     {
       "SrTiO3": {
-        "_space_group_name_H-M_alt": "P m -3 m",
+        #"_space_group_name_H-M_alt": "P m -3 m",
+        "_space_group_name_H-M_alt": "P n m a",
         "_cell_length_a": 3.9,
         "_cell_length_b": 3.9,
         "_cell_length_c": 3.9,
@@ -116,7 +117,10 @@ def compute_pattern(study_dict:dict):
 def clean_after_compute(study_dict:dict):
     files = ['powder_pattern.dat', 'fort.77', f'{phase_name_by_idx(study_dict)}.powder']
     for f in files:
-        os.remove(f)
+        try:
+            os.remove(f)
+        except:
+            pass
 
 # Tests
 
@@ -163,6 +167,7 @@ def test_compute_pattern_SrTiO3_Pnma():
 # Debug
 
 if __name__ == '__main__':
+    clean_after_compute(STUDY_DICT)
     pattern = powder_mod.simulation(STUDY_DICT)
     print('!!! Pattern calculated')
     y_calc = pattern[1].astype(np.float64)
