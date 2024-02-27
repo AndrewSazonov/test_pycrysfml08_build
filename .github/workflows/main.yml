@@ -227,13 +227,22 @@ jobs:
             copy c:/mingw64/bin/libwinpthread-1.dll ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}
             dir ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
 
-      - name: Add magnetic_data.txt database
+      - name: Add magnetic_data.txt database (Linux + macOS)
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        run: |
+          echo '### mkdir -p ${PYCRYSFML_DIST}/${DIST_PACKAGE_NAME}/Databases'
+          mkdir -p ${PYCRYSFML_DIST}/${DIST_PACKAGE_NAME}/Databases
+          echo '### cp ${{ env.CRYSFML_REPO }}/Src/Databases/magnetic_data.txt ${PYCRYSFML_DIST}/${DIST_PACKAGE_NAME}/Databases'
+          cp ${{ env.CRYSFML_REPO }}/Src/Databases/magnetic_data.txt ${PYCRYSFML_DIST}/${DIST_PACKAGE_NAME}/Databases
+
+      - name: Add magnetic_data.txt database (Windows)
+        if: runner.os == 'Windows'
         shell: cmd
         run: |
           echo '### mkdir ${{ env.PROJECTS_DIR }}\\${{ env.PYCRYSFML_PROJECT }}_dist\\${{ env.DIST_PACKAGE_NAME }}\\Databases'
           mkdir ${{ env.PROJECTS_DIR }}\\${{ env.PYCRYSFML_PROJECT }}_dist\\${{ env.DIST_PACKAGE_NAME }}\\Databases
-          echo '### cp ${CRYSFML_REPO}/Src/Databases/magnetic_data.txt ${PYCRYSFML_DIST}/${DIST_PACKAGE_NAME}/Databases'
-          cp ${CRYSFML_REPO}/Src/Databases/magnetic_data.txt ${PYCRYSFML_DIST}/${DIST_PACKAGE_NAME}/Databases
+          echo '### cp ${{ env.CRYSFML_REPO }}/Src/Databases/magnetic_data.txt ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}/Databases'
+          cp ${{ env.CRYSFML_REPO }}/Src/Databases/magnetic_data.txt ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}/Databases
 
       - name: Make PyCrysFML python wheel
         shell: bash
