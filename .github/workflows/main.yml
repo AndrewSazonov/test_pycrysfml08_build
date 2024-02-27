@@ -46,9 +46,8 @@ jobs:
           elif [[ '${{ runner.os }}' == 'macOS' ]]; then
             echo "SEP=/" >> $GITHUB_ENV
           elif [[ '${{ runner.os }}' == 'Windows' ]]; then
-            echo "SEP=/" >> $GITHUB_ENV
+            echo "SEP=\\" >> $GITHUB_ENV
           fi
-
 
       - name: Declare env variables (dependent)
         shell: bash
@@ -105,7 +104,6 @@ jobs:
 
       - name: Build CrysFML using CMake
         if: matrix.build_system == 'cmake'
-        shell: bash
         run: |
           echo '### cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}'
           cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}
@@ -119,26 +117,6 @@ jobs:
 
       - name: Build some PyCrysFML modules one by one (Linux + macOS)
         if: runner.os == 'Linux' || runner.os == 'macOS'
-        shell: bash
-        run: |
-          echo '### mkdir -p ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
-          mkdir -p ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
-          echo '### cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src'
-          cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src
-          for n in py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom; do
-            echo "### ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.f90 -I ${{ env.CRYSFML_DIST }}/include"
-            ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.f90 -I ${{ env.CRYSFML_DIST }}/include
-            echo "### ${{ matrix.compiler }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
-            ${{ matrix.compiler }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
-            echo "### mv $n.so ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}"
-            mv $n.so ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}
-            echo '### ls -l ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}'
-            ls -l ${{ env.PYCRYSFML_DIST }}/${{ env.DIST_PACKAGE_NAME }}
-          done
-
-      - name: Build some PyCrysFML modules one by one (Windows 0)
-        if: runner.os == 'Windows'
-        shell: bash
         run: |
           echo '### mkdir -p ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
           mkdir -p ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
@@ -159,8 +137,8 @@ jobs:
         if: runner.os == 'Windows'
         shell: cmd
         run: |
-          echo '### mkdir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
-          mkdir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+          echo '### mkdir -p ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
+          mkdir -p ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           echo '### cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src'
           cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src
           for %%n in (py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom) do (
