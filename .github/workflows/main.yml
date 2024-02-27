@@ -21,9 +21,6 @@ jobs:
           - os: ubuntu-22.04
             build_system: cmake
             compiler: ifort
-          #- os: ubuntu-22.04
-          #  build_system: fpm
-          #  compiler: ifort
 
     steps:
       - name: Check-out repository
@@ -44,37 +41,47 @@ jobs:
           echo "CRYSFML_PROJECT=crysfml08" >> $GITHUB_ENV
           echo "PYCRYSFML_PROJECT=pycrysfml08" >> $GITHUB_ENV
           echo "DIST_PACKAGE_NAME=pycrysfml08" >> $GITHUB_ENV
+          if [[ '${{ runner.os }}' == 'Linux' ]]; then
+            echo "SEP=/" >> $GITHUB_ENV
+          elif [[ '${{ runner.os }}' == 'macOS' ]]; then
+            echo "SEP=/" >> $GITHUB_ENV
+          elif [[ '${{ runner.os }}' == 'Windows' ]]; then
+            echo "SEP=\\" >> $GITHUB_ENV
+          fi
+
 
       - name: Declare env variables (dependent)
         shell: bash
         run: |
-          echo "CRYSFML_REPO=${{ env.PROJECTS_DIR }}/${{ env.CRYSFML_PROJECT }}_repo" >> $GITHUB_ENV
-          echo "PYCRYSFML_REPO=${{ env.PROJECTS_DIR }}/${{ env.PYCRYSFML_PROJECT }}_repo" >> $GITHUB_ENV
-          echo "CRYSFML_BUILD=${{ env.PROJECTS_DIR }}/${{ env.CRYSFML_PROJECT }}_build" >> $GITHUB_ENV
-          echo "PYCRYSFML_BUILD=${{ env.PROJECTS_DIR }}/${{ env.PYCRYSFML_PROJECT }}_build" >> $GITHUB_ENV
-          echo "CRYSFML_DIST=${{ env.PROJECTS_DIR }}/${{ env.CRYSFML_PROJECT }}_dist" >> $GITHUB_ENV
-          echo "PYCRYSFML_DIST=${{ env.PROJECTS_DIR }}/${{ env.PYCRYSFML_PROJECT }}_dist" >> $GITHUB_ENV
-          echo "PYCRYSFML_WHEEL=${{ env.PROJECTS_DIR }}/${{ env.PYCRYSFML_PROJECT }}_wheel" >> $GITHUB_ENV
-          if [[ '${{ runner.os }}' == 'macOS' ]]; then
+          echo "CRYSFML_REPO=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.CRYSFML_PROJECT }}_repo" >> $GITHUB_ENV
+          echo "PYCRYSFML_REPO=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.PYCRYSFML_PROJECT }}_repo" >> $GITHUB_ENV
+          echo "CRYSFML_BUILD=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.CRYSFML_PROJECT }}_build" >> $GITHUB_ENV
+          echo "PYCRYSFML_BUILD=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.PYCRYSFML_PROJECT }}_build" >> $GITHUB_ENV
+          echo "CRYSFML_DIST=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.CRYSFML_PROJECT }}_dist" >> $GITHUB_ENV
+          echo "PYCRYSFML_DIST=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.PYCRYSFML_PROJECT }}_dist" >> $GITHUB_ENV
+          echo "PYCRYSFML_WHEEL=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.PYCRYSFML_PROJECT }}_wheel" >> $GITHUB_ENV
+          if [[ '${{ runner.os }}' == 'Linux' ]]; then
+            echo "CMAKE_GENERATOR=-G 'Unix Makefiles'" >> $GITHUB_ENV
+          elif [[ '${{ runner.os }}' == 'macOS' ]]; then
+            echo "CMAKE_GENERATOR=-G 'Unix Makefiles'" >> $GITHUB_ENV
             echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)" >> $GITHUB_ENV  # needed because of `brew reinstall gcc`
             echo "LIBPYTHON=-L/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/config-3.11-darwin -lpython3.11" >> $GITHUB_ENV
-          fi
-          if [[ '${{ runner.os }}' == 'Linux' && '${{ matrix.compiler }}' == 'ifort' ]]; then
-            echo "COMPILER_OPTIONS=-fpp -fPIC" >> $GITHUB_ENV
-          elif [[ '${{ matrix.compiler }}' == 'gfortran' ]]; then
-            #echo "COMPILER_OPTIONS=-cpp -std=f2008 -ffree-line-length-none -fPIC" >> $GITHUB_ENV
-            echo "COMPILER_OPTIONS=-cpp -ffree-line-length-none -fPIC" >> $GITHUB_ENV
-          fi
-          if [[ '${{ runner.os }}' == 'Windows' ]]; then
+          elif [[ '${{ runner.os }}' == 'Windows' ]]; then
             echo "CMAKE_GENERATOR=-G 'NMake Makefiles'" >> $GITHUB_ENV
             echo "LIBPYTHON=${{ env.Python_ROOT_DIR }}\\libs\\python311.lib" >> $GITHUB_ENV
+          fi
+          if [[ '${{ matrix.compiler }}' == 'gfortran' ]]; then
+            #echo "COMPILER_OPTIONS=-cpp -std=f2008 -ffree-line-length-none -fPIC" >> $GITHUB_ENV
+            echo "COMPILER_OPTIONS=-cpp -ffree-line-length-none -fPIC" >> $GITHUB_ENV
+          elif [[ '${{ matrix.compiler }}' == 'ifort' ]]; then
+            echo "COMPILER_OPTIONS=-fpp -fPIC" >> $GITHUB_ENV
           fi
 
       - name: Install OS-specific dependences (Windows)
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Install OS-specific dependences (macOS)
+      - name: Install OS-specific dependences (macOS + gfortran)
         if: runner.os == 'macOS' && matrix.compiler == 'gfortran'
         run: |
           brew reinstall gcc  # to add gfortran
@@ -100,7 +107,7 @@ jobs:
         if: matrix.build_system == 'cmake'
         run: |
           echo '### cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}'
-          cmake -G "NMake Makefiles" -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}
+          cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}
           echo '### cmake --build ${{ env.CRYSFML_BUILD }} --parallel'
           cmake --build ${{ env.CRYSFML_BUILD }} --parallel
           echo '### cmake --install ${{ env.CRYSFML_BUILD }}'
