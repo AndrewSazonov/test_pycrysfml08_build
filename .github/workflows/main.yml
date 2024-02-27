@@ -46,7 +46,7 @@ jobs:
           elif [[ '${{ runner.os }}' == 'macOS' ]]; then
             echo "SEP=/" >> $GITHUB_ENV
           elif [[ '${{ runner.os }}' == 'Windows' ]]; then
-            echo "SEP=\\" >> $GITHUB_ENV
+            echo "SEP=/" >> $GITHUB_ENV
           fi
 
 
@@ -105,6 +105,7 @@ jobs:
 
       - name: Build CrysFML using CMake
         if: matrix.build_system == 'cmake'
+        shell: bash
         run: |
           echo '### cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}'
           cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}
@@ -249,17 +250,21 @@ jobs:
       - name: Debug
         shell: bash
         run: |
-          if [[ '${{ runner.os }}' == 'macOS' ]]; then
-            echo "### ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}"
-            ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}
-            echo "### ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases"
-            ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases
-          fi
           if [[ '${{ runner.os }}' == 'Linux' ]]; then
             echo "### ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}"
             ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}
             echo "### ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases"
             ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases
+          elif [[ '${{ runner.os }}' == 'macOS' ]]; then
+            echo "### ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}"
+            ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}
+            echo "### ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases"
+            ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases
+          elif [[ '${{ runner.os }}' == 'Windows' ]]; then
+            echo "### ls -l c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages/${{ env.DIST_PACKAGE_NAME }}"
+            ls -l c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages/${{ env.DIST_PACKAGE_NAME }}
+            echo "### ls -l c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases"
+            ls -l c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases
           fi
           echo '### python3 tests/test_powder_mod.py'
           python3 tests/test_powder_mod.py
