@@ -204,6 +204,8 @@ jobs:
             echo "### ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases"
             ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases
           fi
+          echo '### python3 tests/test_powder_mod.py'
+          python3 tests/test_powder_mod.py
 
       - name: Run tests
         run: pytest tests/ -vv

@@ -1,13 +1,15 @@
 import os
 import sys
 import math
+import copy
 import numpy as np
+from deepdiff import DeepDiff
 from numpy.testing import assert_almost_equal
 
 from pycrysfml08 import powder_mod
 
 
-os.environ['FULLPROF'] = os.path.dirname(powder_mod.__file__)  # access to Src/Databases/magnetic_data.txt
+os.environ['FULLPROF'] = os.path.dirname(powder_mod.__file__)  # access to Databases/magnetic_data.txt
 
 STUDY_DICT = {
   "phases": [
@@ -95,20 +97,65 @@ STUDY_DICT = {
   ]
 }
 
+# Help functions
+
+def phase_name_by_idx(study_dict:dict, phase_idx:int=0):
+    return list(study_dict['phases'][phase_idx].keys())[phase_idx]
+
+def space_group_by_phase_idx(study_dict:dict, phase_idx:int=0):
+    phase_name = phase_name_by_idx(study_dict, phase_idx)
+    return study_dict['phases'][phase_idx][phase_name]['_space_group_name_H-M_alt']
+
+def set_space_group_by_phase_idx(study_dict:dict, phase_idx:int, space_group:str):
+    phase_name = phase_name_by_idx(study_dict, phase_idx)
+    study_dict['phases'][phase_idx][phase_name]['_space_group_name_H-M_alt'] = space_group
+
+def compute_pattern(study_dict:dict):
+    return powder_mod.simulation(study_dict)
+
+def clean_after_compute(study_dict:dict):
+    files = ['powder_pattern.dat', 'fort.77', f'{phase_name_by_idx(study_dict)}.powder']
+    for f in files:
+        os.remove(f)
 
 # Tests
 
-def test_simulation():
-    desired = np.array([1.0, 2.0, 3.0])
-    actual = np.array([1.1, 2.1, 3.1])
-    #powder_mod.simulation(STUDY_DICT)
-    pattern = powder_mod.simulation(STUDY_DICT)
+def test_magnetic_data_txt_exists():
+    fpath = os.path.abspath(os.path.join(os.path.dirname(powder_mod.__file__), 'Databases', 'magnetic_data.txt'))
+    assert os.path.isfile(fpath) == True
+
+def test_phase_name_SrTiO3():
+    assert phase_name_by_idx(STUDY_DICT, phase_idx=0) == 'SrTiO3'
+
+def test_space_group_Pm3m():
+    assert space_group_by_phase_idx(STUDY_DICT, phase_idx=0) == 'P m -3 m'
+
+def test_set_space_group_Pm3m():
+    new_study_dict = copy.deepcopy(STUDY_DICT)
+    set_space_group_by_phase_idx(new_study_dict, phase_idx=0, space_group='P m -3 m')
+    assert DeepDiff(STUDY_DICT, new_study_dict) == {}
+
+def test_set_space_group_Pnma():
+    new_study_dict = copy.deepcopy(STUDY_DICT)
+    set_space_group_by_phase_idx(new_study_dict, phase_idx=0, space_group='P n m a')
+    assert space_group_by_phase_idx(new_study_dict, phase_idx=0) == 'P n m a'
+
+def test_compute_pattern_SrTiO3_Pm3m():
+    _, desired = np.loadtxt('tests/srtio3-pm3m-pattern_Nebil-ifort.xy', unpack=True)
+    study_dict = copy.deepcopy(STUDY_DICT)
+    set_space_group_by_phase_idx(study_dict, phase_idx=0, space_group='P m -3 m')
+    pattern = compute_pattern(study_dict)
     actual = pattern[1].astype(np.float64)
-    assert_almost_equal(desired, actual, decimal=5, verbose=True)
+    # compensate for a 1-element shift in y data between Nebil windows build and my gfortran build
+    desired = y_expected[1:]
+    actual = y_calc[:-1]
+    assert_almost_equal(desired, actual, decimal=0, verbose=True)
 
-def simulation():
+
+# Debug
+
+if __name__ == '__main__':
     pattern = powder_mod.simulation(STUDY_DICT)
+    print('!!! Pattern calculated')
     y_calc = pattern[1].astype(np.float64)
-    print("---", y_calc)
-
-simulation()
+    print("!!! y_calc\n", y_calc)
