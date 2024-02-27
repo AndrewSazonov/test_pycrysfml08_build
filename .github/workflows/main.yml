@@ -237,6 +237,7 @@ jobs:
           python3 -m pip install "${{ env.DIST_PACKAGE_NAME }}[dev]" --find-links=${{ env.PYCRYSFML_WHEEL }}
 
       - name: Debug
+        shell: bash
         run: |
           if [[ '${{ runner.os }}' == 'macOS' ]]; then
             echo "### ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}"
