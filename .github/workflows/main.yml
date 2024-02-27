@@ -118,8 +118,8 @@ jobs:
       - name: Build some PyCrysFML modules one by one (Linux + macOS)
         if: runner.os == 'Linux' || runner.os == 'macOS'
         run: |
-          echo '### mkdir -p ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
-          mkdir -p ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+          echo '### mkdir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
+          mkdir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           echo '### cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src'
           cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src
           for n in py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom; do
