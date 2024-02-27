@@ -98,7 +98,7 @@ jobs:
       #    printenv >> $GITHUB_ENV
       #    ifort --version
 
-      - name: Download CrysFML (fpm_macos branch)
+      - name: Download CrysFML (powder_mod_fix branch)
         run: git clone --single-branch --branch powder_mod_fix https://code.ill.fr/rodriguez-carvajal/crysfml2008.git ${{ env.CRYSFML_REPO }}
 
       - name: Build CrysFML using CMake
