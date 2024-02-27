@@ -2,8 +2,8 @@ name: main
 
 on:
   push:
-  schedule:
-    - cron: '*/120 8-18 * * *'  # every 2 hours from 8:00 to 18:00 every day
+  #schedule:
+  #  - cron: '*/120 8-18 * * *'  # every 2 hours from 8:00 to 18:00 every day
 
 jobs:
   main:
@@ -15,15 +15,15 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-12, ubuntu-22.04]  # [ubuntu-22.04, macos-12, windows-2022]
-        build_system: [cmake, fpm]  # [cmake, fpm]
+        build_system: [cmake]  # [cmake, fpm]
         compiler: [gfortran]  # [gfortran, ifort]
         include:
           - os: ubuntu-22.04
             build_system: cmake
             compiler: ifort
-          - os: ubuntu-22.04
-            build_system: fpm
-            compiler: ifort
+          #- os: ubuntu-22.04
+          #  build_system: fpm
+          #  compiler: ifort
 
     steps:
       - name: Check-out repository

@@ -6,6 +6,9 @@ from numpy.testing import assert_almost_equal
 
 from pycrysfml08 import powder_mod
 
+
+os.environ['FULLPROF'] = os.path.dirname(powder_mod.__file__)  # access to Src/Databases/magnetic_data.txt
+
 STUDY_DICT = {
   "phases": [
     {
@@ -102,3 +105,10 @@ def test_simulation():
     pattern = powder_mod.simulation(STUDY_DICT)
     actual = pattern[1].astype(np.float64)
     assert_almost_equal(desired, actual, decimal=5, verbose=True)
+
+def simulation():
+    pattern = powder_mod.simulation(STUDY_DICT)
+    y_calc = pattern[1].astype(np.float64)
+    print("---", y_calc)
+
+simulation()
