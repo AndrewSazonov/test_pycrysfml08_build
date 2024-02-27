@@ -61,13 +61,16 @@ jobs:
           echo "PYCRYSFML_WHEEL=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.PYCRYSFML_PROJECT }}_wheel" >> $GITHUB_ENV
           if [[ '${{ runner.os }}' == 'Linux' ]]; then
             echo "CMAKE_GENERATOR=-G 'Unix Makefiles'" >> $GITHUB_ENV
+            echo "SITE_PACKAGES=/opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages" >> $GITHUB_ENV
           elif [[ '${{ runner.os }}' == 'macOS' ]]; then
             echo "CMAKE_GENERATOR=-G 'Unix Makefiles'" >> $GITHUB_ENV
             echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)" >> $GITHUB_ENV  # needed because of `brew reinstall gcc`
             echo "LIBPYTHON=-L/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/config-3.11-darwin -lpython3.11" >> $GITHUB_ENV
+            echo "SITE_PACKAGES=/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages" >> $GITHUB_ENV
           elif [[ '${{ runner.os }}' == 'Windows' ]]; then
             echo "CMAKE_GENERATOR=-G 'NMake Makefiles'" >> $GITHUB_ENV
             echo "LIBPYTHON=${{ env.Python_ROOT_DIR }}\\libs\\python311.lib" >> $GITHUB_ENV
+            echo "SITE_PACKAGES=c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages" >> $GITHUB_ENV
           fi
           if [[ '${{ matrix.compiler }}' == 'gfortran' ]]; then
             #echo "COMPILER_OPTIONS=-cpp -std=f2008 -ffree-line-length-none -fPIC" >> $GITHUB_ENV
@@ -160,21 +163,22 @@ jobs:
       - name: Store required system DLLs (Windows)
         if: runner.os == 'Windows'
         run: |
-            copy ${{ env.Python_ROOT_DIR }}\\python311.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
-            copy c:\\mingw64\\bin\\libgcc_s_seh-1.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
-            copy c:\\mingw64\\bin\\libgfortran-5.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
-            copy c:\\mingw64\\bin\\libquadmath-0.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
-            copy c:\\mingw64\\bin\\libwinpthread-1.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
+            cp ${{ env.Python_ROOT_DIR }}\\python311.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
+            cp c:\\mingw64\\bin\\libgcc_s_seh-1.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
+            cp c:\\mingw64\\bin\\libgfortran-5.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
+            cp c:\\mingw64\\bin\\libquadmath-0.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
+            cp c:\\mingw64\\bin\\libwinpthread-1.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
             echo '::::: dir ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}'
-            dir ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
+            ls -l ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
 
       - name: Add magnetic_data.txt database
-        if: runner.os == 'Linux' || runner.os == 'macOS'
         run: |
           echo '::::: mkdir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}Databases'
           mkdir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}Databases
           echo '::::: cp ${{ env.CRYSFML_REPO }}${{ env.SEP }}Src${{ env.SEP }}Databases${{ env.SEP }}magnetic_data.txt ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}Databases'
           cp ${{ env.CRYSFML_REPO }}${{ env.SEP }}Src${{ env.SEP }}Databases${{ env.SEP }}magnetic_data.txt ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}Databases
+          echo '::::: ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}Databases'
+          ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}Databases
 
       - name: Make PyCrysFML python wheel
         run: |
@@ -196,26 +200,13 @@ jobs:
           python3 -m pip install "${{ env.DIST_PACKAGE_NAME }}[dev]" --find-links=${{ env.PYCRYSFML_WHEEL }}
 
       - name: Debug
-        shell: bash
         run: |
-          if [[ '${{ runner.os }}' == 'Linux' ]]; then
-            echo "::::: ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}"
-            ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}
-            echo "::::: ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases"
-            ls -l /opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases
-          elif [[ '${{ runner.os }}' == 'macOS' ]]; then
-            echo "::::: ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}"
-            ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}
-            echo "::::: ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases"
-            ls -l /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases
-          elif [[ '${{ runner.os }}' == 'Windows' ]]; then
-            echo "::::: ls -l c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages/${{ env.DIST_PACKAGE_NAME }}"
-            ls -l c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages/${{ env.DIST_PACKAGE_NAME }}
-            echo "::::: ls -l c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases"
-            ls -l c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages/${{ env.DIST_PACKAGE_NAME }}/Databases
-          fi
+          echo "::::: ls -l ${{ env.SITE_PACKAGES }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
+          ls -l ${{ env.SITE_PACKAGES }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+          echo "::::: ls -l ${{ env.SITE_PACKAGES }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}Databases"
+          ls -l ${{ env.SITE_PACKAGES }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}Databases
           echo '::::: python3 tests/test_powder_mod.py'
-          python3 tests/test_powder_mod.py
+          python3 tests${{ env.SEP }}test_powder_mod.py
 
       - name: Run tests
         run: pytest tests/ -vv
