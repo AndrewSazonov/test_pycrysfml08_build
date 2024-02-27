@@ -106,7 +106,6 @@ jobs:
         run: git clone --single-branch --branch powder_mod_fix https://code.ill.fr/rodriguez-carvajal/crysfml2008.git ${{ env.CRYSFML_REPO }}
 
       - name: Build CrysFML using CMake
-        if: matrix.build_system == 'cmake'
         run: |
           echo '::::: cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}'
           cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=${{ matrix.compiler }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}
@@ -206,8 +205,8 @@ jobs:
           ls -l ${{ env.SITE_PACKAGES }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           echo "::::: ls -l ${{ env.SITE_PACKAGES }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}Databases"
           ls -l ${{ env.SITE_PACKAGES }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}Databases
-          echo '::::: python3 tests/test_powder_mod.py'
-          python3 tests${{ env.SEP }}test_powder_mod.py
+          echo '::::: python tests/test_powder_mod.py'
+          python tests${{ env.SEP }}test_powder_mod.py
 
       - name: Run tests
         run: pytest tests/ -vv

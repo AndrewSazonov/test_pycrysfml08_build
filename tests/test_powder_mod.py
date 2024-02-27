@@ -15,8 +15,8 @@ STUDY_DICT = {
   "phases": [
     {
       "SrTiO3": {
-        #"_space_group_name_H-M_alt": "P m -3 m",
-        "_space_group_name_H-M_alt": "P n m a",
+        "_space_group_name_H-M_alt": "P m -3 m",
+        #"_space_group_name_H-M_alt": "P n m a",
         "_cell_length_a": 3.9,
         "_cell_length_b": 3.9,
         "_cell_length_c": 3.9,
@@ -167,7 +167,15 @@ def test_compute_pattern_SrTiO3_Pnma():
 # Debug
 
 if __name__ == '__main__':
-    clean_after_compute(STUDY_DICT)
-    _, y_calc = powder_mod.simulation(STUDY_DICT)
     np.set_printoptions(precision=6)
-    print('::::: Y calculated:', y_calc)
+    study_dict = copy.deepcopy(STUDY_DICT)
+
+    #clean_after_compute(study_dict)
+    #study_dict["phases"][0]["SrTiO3"]["_space_group_name_H-M_alt"] = 'P m -3 m'
+    #_, y_calc = powder_mod.simulation(study_dict)
+    #print('::::: Y calculated (P m -3 m):', y_calc)
+
+    #clean_after_compute(STUDY_DICT)
+    study_dict["phases"][0]["SrTiO3"]["_space_group_name_H-M_alt"] = 'P n m a'
+    _, y_calc = powder_mod.simulation(study_dict)
+    print('::::: Y calculated (P n m a):', y_calc)
