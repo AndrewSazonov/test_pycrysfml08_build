@@ -144,32 +144,32 @@ jobs:
 
       - name: Build some PyCrysFML modules one by one (Windows)
         if: runner.os == 'Windows'
-        #shell: cmd
+        shell: cmd
         run: |
           echo '::::: mkdir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
           mkdir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           echo '::::: cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src'
           cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src
-          #for %%n in (py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom powder_mod) do (
-          #  echo '::::: ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}/include'
-          #  ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}/include
-          #  echo '::::: ${{ matrix.compiler }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}'
-          #  ${{ matrix.compiler }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
-          #  echo '::::: move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
-          #  move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
-          #)
-          foreach ($n in py_cfml_metrics, py_cfml_profiles, py_cfml_sxtal_geom, powder_mod) {
-            echo "::::: ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include"
-            ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include
-            echo "::::: ${{ matrix.compiler }} -shared -o $n.pyd $n.o -L ${{ env.CRYSFML_DIST }}${{ env.SEP }}lib -l CrysFML08 ${{ env.LIBPYTHON }}"
-            ${{ matrix.compiler }} -shared -o $n.pyd $n.o -L ${{ env.CRYSFML_DIST }}${{ env.SEP }}lib -l CrysFML08 ${{ env.LIBPYTHON }}
-            echo "::::: move $n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
-            move $n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
-          }
+          for %%n in (py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom powder_mod) do (
+            echo "::::: ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}/include"
+            ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}/include
+            echo "::::: ${{ matrix.compiler }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
+            ${{ matrix.compiler }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
+            echo "::::: move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
+            move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+          )
+          #foreach ($n in "py_cfml_metrics", "py_cfml_profiles", "py_cfml_sxtal_geom", "powder_mod") {
+          #  echo "::::: ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include"
+          #  ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include
+          #  echo "::::: ${{ matrix.compiler }} -shared -o $n.pyd $n.o -L ${{ env.CRYSFML_DIST }}${{ env.SEP }}lib -l CrysFML08 ${{ env.LIBPYTHON }}"
+          #  ${{ matrix.compiler }} -shared -o $n.pyd $n.o -L ${{ env.CRYSFML_DIST }}${{ env.SEP }}lib -l CrysFML08 ${{ env.LIBPYTHON }}
+          #  echo "::::: move $n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
+          #  move $n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+          #}
           echo '::::: dir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
           dir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
 
-      - name: Store required system DLLs (Windows)
+      - name: Add required system DLLs (Windows)
         if: runner.os == 'Windows'
         run: |
             cp ${{ env.Python_ROOT_DIR }}\\python311.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}

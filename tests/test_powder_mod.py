@@ -169,6 +169,4 @@ def test_compute_pattern_SrTiO3_Pnma():
 if __name__ == '__main__':
     clean_after_compute(STUDY_DICT)
     pattern = powder_mod.simulation(STUDY_DICT)
-    print('!!! Pattern calculated')
-    y_calc = pattern[1].astype(np.float64)
-    print("!!! y_calc\n", y_calc)
+    print('::::: Y calculated:', pattern[1].astype(np.float64))
