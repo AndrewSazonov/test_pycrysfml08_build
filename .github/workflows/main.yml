@@ -158,7 +158,7 @@ jobs:
           #  echo '::::: move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
           #  move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           #)
-          foreach ($n in "py_cfml_metrics", "py_cfml_profiles", "py_cfml_sxtal_geom", "powder_mod") {
+          foreach ($n in py_cfml_metrics, py_cfml_profiles, py_cfml_sxtal_geom, powder_mod) {
             echo "::::: ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include"
             ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include
             echo "::::: ${{ matrix.compiler }} -shared -o $n.pyd $n.o -L ${{ env.CRYSFML_DIST }}${{ env.SEP }}lib -l CrysFML08 ${{ env.LIBPYTHON }}"
