@@ -44,6 +44,7 @@ jobs:
           echo "CRYSFML_PROJECT=crysfml08" >> $GITHUB_ENV
           echo "PYCRYSFML_PROJECT=pycrysfml08" >> $GITHUB_ENV
           echo "DIST_PACKAGE_NAME=pycrysfml08" >> $GITHUB_ENV
+          echo "DIST_PACKAGE_VERSION=0.0.1a0" >> $GITHUB_ENV
           echo "PYTHON_TAG=py311" >> $GITHUB_ENV
           if [[ '${{ runner.os }}' == 'Linux' ]]; then
             echo "SEP=/" >> $GITHUB_ENV
@@ -81,6 +82,8 @@ jobs:
           echo "CRYSFML_DIST=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.CRYSFML_PROJECT }}_dist" >> $GITHUB_ENV
           echo "PYCRYSFML_DIST=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.PYCRYSFML_PROJECT }}_dist" >> $GITHUB_ENV
           echo "PYCRYSFML_WHEEL=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.PYCRYSFML_PROJECT }}_wheel" >> $GITHUB_ENV
+          echo "ORIGINAL_WHEEL_NAME=${{ env.DIST_PACKAGE_NAME }}-${{ env.DIST_PACKAGE_VERSION }}-py3-none-any.whl" >> $GITHUB_ENV
+          echo "FIXED_WHEEL_NAME=${{ env.DIST_PACKAGE_NAME }}-${{ env.DIST_PACKAGE_VERSION }}-${{ env.PYTHON_TAG }}-none-${{ env.PLATFORM_TAG }}.whl" >> $GITHUB_ENV
 
       - name: Install OS-specific dependences (Windows)
         if: runner.os == 'Windows'
@@ -261,15 +264,15 @@ jobs:
         run: |
           echo '::::: python -m pip install wheel'
           python -m pip install wheel
-          echo '::::: python -m wheel tags --python-tag ${{ env.PYTHON_TAG }} --platform-tag ${{ env.PLATFORM_TAG }} ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}*.whl'
-          python -m wheel tags --python-tag ${{ env.PYTHON_TAG }} --platform-tag ${{ env.PLATFORM_TAG }} ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}*.whl
+          echo '::::: python -m wheel tags --python-tag ${{ env.PYTHON_TAG }} --platform-tag ${{ env.PLATFORM_TAG }} ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.ORIGINAL_WHEEL_NAME }}'
+          python -m wheel tags --python-tag ${{ env.PYTHON_TAG }} --platform-tag ${{ env.PLATFORM_TAG }} ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.ORIGINAL_WHEEL_NAME }}
           echo "::::: ls -l ${{ env.PYCRYSFML_WHEEL }}"
           ls -l ${{ env.PYCRYSFML_WHEEL }}
 
       - name: Delete old wheel
         run: |
-          echo "::::: rm -rf ${{ env.PYCRYSFML_WHEEL }}/*-py3-none-any.whl"
-          rm -rf ${{ env.PYCRYSFML_WHEEL }}/*-py3-none-any.whl
+          echo "::::: rm -rf ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.ORIGINAL_WHEEL_NAME }}"
+          rm -rf ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.ORIGINAL_WHEEL_NAME }}
           echo "::::: ls -l ${{ env.PYCRYSFML_WHEEL }}"
           ls -l ${{ env.PYCRYSFML_WHEEL }}
 
@@ -283,7 +286,8 @@ jobs:
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
-          path: ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}*.whl
+          name: ${{ env.FIXED_WHEEL_NAME }}
+          path: ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.FIXED_WHEEL_NAME }}
 
       - name: Debug 2
         run: |
