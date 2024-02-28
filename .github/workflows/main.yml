@@ -213,6 +213,8 @@ jobs:
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.5
+        env:
+          CIBW_BUILD_VERBOSITY: 1
         with:
           package-dir: ${{ env.PYCRYSFML_DIST }}
           output-dir: ${{ env.PYCRYSFML_WHEEL }}
