@@ -14,16 +14,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-12, ubuntu-22.04, windows-2022]  # [ubuntu-22.04, macos-12, windows-2022]
+        os: [ubuntu-22.04]  # [ubuntu-22.04, macos-12, windows-2022]
         build_system: [cmake]  # [cmake, fpm]
         compiler: [gfortran]  # [gfortran, ifort]
-        include:
-          - os: ubuntu-22.04
-            build_system: cmake
-            compiler: ifort
-          - os: ubuntu-22.04
-            build_system: cmake
-            compiler: ifx
+        #include:
+        #  - os: ubuntu-22.04
+        #    build_system: cmake
+        #    compiler: ifort
+        #  - os: ubuntu-22.04
+        #    build_system: cmake
+        #    compiler: ifx
 
     steps:
       - name: Check-out repository
@@ -219,6 +219,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.16.5
         env:
           CIBW_BUILD_VERBOSITY: 1
+          CIBW_PLATFORM: linux
         with:
           package-dir: ${{ env.PYCRYSFML_DIST }}
           output-dir: ${{ env.PYCRYSFML_WHEEL }}
