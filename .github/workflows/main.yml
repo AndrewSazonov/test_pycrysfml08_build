@@ -123,8 +123,8 @@ jobs:
 
       - name: Copy powder_mod.f90 to PyCrysFML src folder
         run: |
-          echo '::::: cp ${{ env.CRYSFML_REPO }}${{ env.SEP }}Testing${{ env.SEP }}Powder${{ env.SEP }}Test_2${{ env.SEP }}fortran${{ env.SEP }}src${{ env.SEP }}powder_mod.f90 ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src'
-          cp ${{ env.CRYSFML_REPO }}${{ env.SEP }}Testing${{ env.SEP }}Powder${{ env.SEP }}Test_2${{ env.SEP }}fortran${{ env.SEP }}src${{ env.SEP }}powder_mod.f90 ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src
+          echo '::::: cp ${{ env.CRYSFML_REPO }}${{ env.SEP }}Testing${{ env.SEP }}Powder${{ env.SEP }}Test_2${{ env.SEP }}fortran${{ env.SEP }}src${{ env.SEP }}powder_mod.f90 ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src${{ env.SEP }}powder_mod.F90'
+          cp ${{ env.CRYSFML_REPO }}${{ env.SEP }}Testing${{ env.SEP }}Powder${{ env.SEP }}Test_2${{ env.SEP }}fortran${{ env.SEP }}src${{ env.SEP }}powder_mod.f90 ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src${{ env.SEP }}powder_mod.F90
 
       - name: Build some PyCrysFML modules one by one (Linux + macOS)
         if: runner.os == 'Linux' || runner.os == 'macOS'
@@ -135,8 +135,8 @@ jobs:
           cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src
           #for n in py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom powder_mod; do
           for n in py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom powder_mod; do
-            echo "::::: ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.f90 -I ${{ env.CRYSFML_DIST }}/include"
-            ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.f90 -I ${{ env.CRYSFML_DIST }}/include
+            echo "::::: ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.F90 -I ${{ env.CRYSFML_DIST }}/include"
+            ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.F90 -I ${{ env.CRYSFML_DIST }}/include
             echo "::::: ${{ matrix.compiler }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
             ${{ matrix.compiler }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
             echo "::::: mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
