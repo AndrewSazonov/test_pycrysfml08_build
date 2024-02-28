@@ -231,10 +231,8 @@ jobs:
           name: ${{ env.FIXED_WHEEL_NAME }}
           path: ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.FIXED_WHEEL_NAME }}
 
-      - name: Debug
-        run: |
-          echo '::::: python tests/test_powder_mod.py'
-          python tests${{ env.SEP }}test_powder_mod.py
-
       - name: Run tests
         run: pytest tests/ -vv
+
+      - name: Debug
+        run: python tests${{ env.SEP }}test_powder_mod.py
