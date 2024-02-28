@@ -202,6 +202,12 @@ jobs:
           cp ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           echo '::::: cp ${{ env.PROJECTS_DIR }}${{ env.SEP }}pyproject.toml ${{ env.PYCRYSFML_DIST }}'
           cp ${{ env.PROJECTS_DIR }}${{ env.SEP }}pyproject.toml ${{ env.PYCRYSFML_DIST }}
+          echo '::::: cp ${{ env.PROJECTS_DIR }}${{ env.SEP }}LICENSE ${{ env.PYCRYSFML_DIST }}'
+          cp ${{ env.PROJECTS_DIR }}${{ env.SEP }}LICENSE ${{ env.PYCRYSFML_DIST }}
+          echo '::::: cp ${{ env.PROJECTS_DIR }}${{ env.SEP }}README.md ${{ env.PYCRYSFML_DIST }}'
+          cp ${{ env.PROJECTS_DIR }}${{ env.SEP }}README.md ${{ env.PYCRYSFML_DIST }}
+          echo '::::: ls -l ${{ env.PYCRYSFML_DIST }}'
+          ls -l ${{ env.PYCRYSFML_DIST }}
           echo '::::: ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
           ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
 
