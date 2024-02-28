@@ -135,8 +135,8 @@ jobs:
             ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c $n.f90 -I ${{ env.CRYSFML_DIST }}/include
             echo "::::: ${{ matrix.compiler }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
             ${{ matrix.compiler }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
-            echo "::::: mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
-            mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+            #echo "::::: mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
+            #mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           done
           echo '::::: ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
           ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
@@ -154,8 +154,8 @@ jobs:
             ${{ matrix.compiler }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}/include
             echo "::::: ${{ matrix.compiler }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
             ${{ matrix.compiler }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
-            echo "::::: move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
-            move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+            #echo "::::: move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
+            #move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           )
           echo '::::: dir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
           dir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
@@ -213,8 +213,8 @@ jobs:
 
       - name: Install PyCrysFML from local wheel (with dev extras)
         run: |
-          echo "::::: ls -l ${{ env.SITE_PACKAGES }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
-          ls -l ${{ env.SITE_PACKAGES }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+          echo "::::: ls -l ${{ env.PYCRYSFML_WHEEL }}"
+          ls -l ${{ env.PYCRYSFML_WHEEL }}
           echo '::::: python3 -m pip install "${{ env.DIST_PACKAGE_NAME }}[dev]" --find-links=${{ env.PYCRYSFML_WHEEL }}'
           python3 -m pip install "${{ env.DIST_PACKAGE_NAME }}[dev]" --find-links=${{ env.PYCRYSFML_WHEEL }}
 
