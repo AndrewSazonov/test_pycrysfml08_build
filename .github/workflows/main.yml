@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04]  # [ubuntu-22.04, macos-12, windows-2022]
+        os: [ubuntu-22.04, macos-12, windows-2022]  # [ubuntu-22.04, macos-12, windows-2022]
         build_system: [cmake]  # [cmake, fpm]
         compiler: [gfortran]  # [gfortran, ifort]
         #include:
@@ -47,7 +47,7 @@ jobs:
           echo "PYTHON_TAG=py311" >> $GITHUB_ENV
           if [[ '${{ runner.os }}' == 'Linux' ]]; then
             echo "SEP=/" >> $GITHUB_ENV
-            echo "PLATFORM_TAG=manylinux_x86_64" >> $GITHUB_ENV
+            echo "PLATFORM_TAG=linux_x86_64" >> $GITHUB_ENV
             echo "CMAKE_GENERATOR=-G 'Unix Makefiles'" >> $GITHUB_ENV
             echo "SITE_PACKAGES=/opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages" >> $GITHUB_ENV
           elif [[ '${{ runner.os }}' == 'macOS' ]]; then
@@ -59,7 +59,7 @@ jobs:
             echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)" >> $GITHUB_ENV  # needed because of `brew reinstall gcc`
           elif [[ '${{ runner.os }}' == 'Windows' ]]; then
             echo "SEP=\\" >> $GITHUB_ENV
-            echo "PLATFORM_TAG=win_amd64" >> $GITHUB_ENV
+            echo "PLATFORM_TAG=win32" >> $GITHUB_ENV
             echo "CMAKE_GENERATOR=-G 'NMake Makefiles'" >> $GITHUB_ENV
             echo "SITE_PACKAGES=c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages" >> $GITHUB_ENV
             echo "LIBPYTHON=${{ env.Python_ROOT_DIR }}\\libs\\python311.lib" >> $GITHUB_ENV
@@ -263,11 +263,15 @@ jobs:
           python -m pip install wheel
           echo '::::: python -m wheel tags --python-tag ${{ env.PYTHON_TAG }} --platform-tag ${{ env.PLATFORM_TAG }} ${{ env.PYCRYSFML_WHEEL }}/*.whl'
           python -m wheel tags --python-tag ${{ env.PYTHON_TAG }} --platform-tag ${{ env.PLATFORM_TAG }} ${{ env.PYCRYSFML_WHEEL }}/*.whl
+          echo "::::: ls -l ${{ env.PYCRYSFML_WHEEL }}"
+          ls -l ${{ env.PYCRYSFML_WHEEL }}
 
       - name: Delete old wheel
         run: |
           echo "::::: rm -rf ${{ env.PYCRYSFML_WHEEL }}/*-py3-none-any.whl"
           rm -rf ${{ env.PYCRYSFML_WHEEL }}/*-py3-none-any.whl
+          echo "::::: ls -l ${{ env.PYCRYSFML_WHEEL }}"
+          ls -l ${{ env.PYCRYSFML_WHEEL }}
 
       - name: Install PyCrysFML from local wheel (with dev extras)
         run: |
