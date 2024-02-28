@@ -39,4 +39,3 @@ artifacts = ["*.py", "*.so", "*.pyd", "*.dll", "*.txt"]
 
 [tool.cibuildwheel]
 build="cp311-*"
-platform="linux"

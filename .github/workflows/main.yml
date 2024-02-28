@@ -246,7 +246,7 @@ jobs:
           echo '::::: python -m pip install cibuildwheel'
           python -m pip install cibuildwheel
           echo '::::: cibuildwheel --platform linux --output-dir ${PYCRYSFML_WHEEL} ${PYCRYSFML_DIST}'
-          cibuildwheel --platform linux --output-dir ${PYCRYSFML_WHEEL} ${PYCRYSFML_DIST}
+          cibuildwheel --platform windows --output-dir ${PYCRYSFML_WHEEL} ${PYCRYSFML_DIST}
 
       - name: Debug 1
         run: |
