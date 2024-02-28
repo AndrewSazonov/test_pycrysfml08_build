@@ -44,12 +44,31 @@ jobs:
           echo "CRYSFML_PROJECT=crysfml08" >> $GITHUB_ENV
           echo "PYCRYSFML_PROJECT=pycrysfml08" >> $GITHUB_ENV
           echo "DIST_PACKAGE_NAME=pycrysfml08" >> $GITHUB_ENV
+          echo "PYTHON_TAG=py311" >> $GITHUB_ENV
           if [[ '${{ runner.os }}' == 'Linux' ]]; then
             echo "SEP=/" >> $GITHUB_ENV
+            echo "PLATFORM_TAG=manylinux_x86_64" >> $GITHUB_ENV
+            echo "CMAKE_GENERATOR=-G 'Unix Makefiles'" >> $GITHUB_ENV
+            echo "SITE_PACKAGES=/opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages" >> $GITHUB_ENV
           elif [[ '${{ runner.os }}' == 'macOS' ]]; then
             echo "SEP=/" >> $GITHUB_ENV
+            echo "PLATFORM_TAG=macosx_x86_64" >> $GITHUB_ENV
+            echo "CMAKE_GENERATOR=-G 'Unix Makefiles'" >> $GITHUB_ENV
+            echo "SITE_PACKAGES=/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages" >> $GITHUB_ENV
+            echo "LIBPYTHON=-L/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/config-3.11-darwin -lpython3.11" >> $GITHUB_ENV
+            echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)" >> $GITHUB_ENV  # needed because of `brew reinstall gcc`
           elif [[ '${{ runner.os }}' == 'Windows' ]]; then
             echo "SEP=\\" >> $GITHUB_ENV
+            echo "PLATFORM_TAG=win_amd64" >> $GITHUB_ENV
+            echo "CMAKE_GENERATOR=-G 'NMake Makefiles'" >> $GITHUB_ENV
+            echo "SITE_PACKAGES=c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages" >> $GITHUB_ENV
+            echo "LIBPYTHON=${{ env.Python_ROOT_DIR }}\\libs\\python311.lib" >> $GITHUB_ENV
+          fi
+          if [[ '${{ matrix.compiler }}' == 'gfortran' ]]; then
+            #echo "COMPILER_OPTIONS=-cpp -std=f2008 -ffree-line-length-none -fPIC" >> $GITHUB_ENV
+            echo "COMPILER_OPTIONS=-cpp -ffree-line-length-none -fPIC" >> $GITHUB_ENV
+          elif [[ '${{ matrix.compiler }}' == 'ifort' || '${{ matrix.compiler }}' == 'ifx' ]]; then
+            echo "COMPILER_OPTIONS=-fpp -fPIC" >> $GITHUB_ENV
           fi
 
       - name: Declare env variables (dependent)
@@ -62,25 +81,6 @@ jobs:
           echo "CRYSFML_DIST=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.CRYSFML_PROJECT }}_dist" >> $GITHUB_ENV
           echo "PYCRYSFML_DIST=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.PYCRYSFML_PROJECT }}_dist" >> $GITHUB_ENV
           echo "PYCRYSFML_WHEEL=${{ env.PROJECTS_DIR }}${{ env.SEP }}${{ env.PYCRYSFML_PROJECT }}_wheel" >> $GITHUB_ENV
-          if [[ '${{ runner.os }}' == 'Linux' ]]; then
-            echo "CMAKE_GENERATOR=-G 'Unix Makefiles'" >> $GITHUB_ENV
-            echo "SITE_PACKAGES=/opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages" >> $GITHUB_ENV
-          elif [[ '${{ runner.os }}' == 'macOS' ]]; then
-            echo "CMAKE_GENERATOR=-G 'Unix Makefiles'" >> $GITHUB_ENV
-            echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)" >> $GITHUB_ENV  # needed because of `brew reinstall gcc`
-            echo "LIBPYTHON=-L/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/config-3.11-darwin -lpython3.11" >> $GITHUB_ENV
-            echo "SITE_PACKAGES=/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages" >> $GITHUB_ENV
-          elif [[ '${{ runner.os }}' == 'Windows' ]]; then
-            echo "CMAKE_GENERATOR=-G 'NMake Makefiles'" >> $GITHUB_ENV
-            echo "LIBPYTHON=${{ env.Python_ROOT_DIR }}\\libs\\python311.lib" >> $GITHUB_ENV
-            echo "SITE_PACKAGES=c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages" >> $GITHUB_ENV
-          fi
-          if [[ '${{ matrix.compiler }}' == 'gfortran' ]]; then
-            #echo "COMPILER_OPTIONS=-cpp -std=f2008 -ffree-line-length-none -fPIC" >> $GITHUB_ENV
-            echo "COMPILER_OPTIONS=-cpp -ffree-line-length-none -fPIC" >> $GITHUB_ENV
-          elif [[ '${{ matrix.compiler }}' == 'ifort' || '${{ matrix.compiler }}' == 'ifx' ]]; then
-            echo "COMPILER_OPTIONS=-fpp -fPIC" >> $GITHUB_ENV
-          fi
 
       - name: Install OS-specific dependences (Windows)
         if: runner.os == 'Windows'
@@ -232,21 +232,21 @@ jobs:
       #    package-dir: ${{ env.PYCRYSFML_DIST }}
       #    output-dir: ${{ env.PYCRYSFML_WHEEL }}
 
-      #- name: Build PyCrysFML python wheel
-      #  run: |
-      #    echo '::::: python -m pip install build'
-      #    python -m pip install build
-      #    #echo '::::: touch ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py'
-      #    #touch ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py
-      #    echo '::::: python3 -m build --wheel --outdir ${{ env.PYCRYSFML_WHEEL }}'
-      #    python3 -m build --wheel --outdir ${{ env.PYCRYSFML_WHEEL }}
-
       - name: Build PyCrysFML python wheel
         run: |
-          echo '::::: python -m pip install cibuildwheel'
-          python -m pip install cibuildwheel
-          echo '::::: cibuildwheel --platform linux --output-dir ${PYCRYSFML_WHEEL} ${PYCRYSFML_DIST}'
-          cibuildwheel --platform windows --output-dir ${PYCRYSFML_WHEEL} ${PYCRYSFML_DIST}
+          echo '::::: python -m pip install build'
+          python -m pip install build
+          #echo '::::: touch ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py'
+          #touch ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py
+          echo '::::: python3 -m build --wheel --outdir ${{ env.PYCRYSFML_WHEEL }}'
+          python3 -m build --wheel --outdir ${{ env.PYCRYSFML_WHEEL }}
+
+      #- name: Build PyCrysFML python wheel
+      #  run: |
+      #    echo '::::: python -m pip install cibuildwheel'
+      #    python -m pip install cibuildwheel
+      #    echo '::::: cibuildwheel --platform linux --output-dir ${PYCRYSFML_WHEEL} ${PYCRYSFML_DIST}'
+      #    cibuildwheel --platform linux --output-dir ${PYCRYSFML_WHEEL} ${PYCRYSFML_DIST}
 
       - name: Debug 1
         run: |
@@ -257,12 +257,29 @@ jobs:
           echo '::::: ls - l ${{ env.PYCRYSFML_WHEEL }}'
           ls -l ${{ env.PYCRYSFML_WHEEL }}
 
+      - name: Rename wheel
+        run: |
+          echo '::::: python -m pip install wheel'
+          python -m pip install wheel
+          echo '::::: python -m wheel tags --python-tag ${{ env.PYTHON_TAG }} --platform-tag ${{ env.PLATFORM_TAG }} ${{ env.PYCRYSFML_WHEEL }}/*.whl'
+          python -m wheel tags --python-tag ${{ env.PYTHON_TAG }} --platform-tag ${{ env.PLATFORM_TAG }} ${{ env.PYCRYSFML_WHEEL }}/*.whl
+
+      - name: Delete old wheel
+        run: |
+          echo "::::: rm -rf ${{ env.PYCRYSFML_WHEEL }}/*-py3-none-any.whl"
+          rm -rf ${{ env.PYCRYSFML_WHEEL }}/*-py3-none-any.whl
+
       - name: Install PyCrysFML from local wheel (with dev extras)
         run: |
           echo "::::: ls -l ${{ env.PYCRYSFML_WHEEL }}"
           ls -l ${{ env.PYCRYSFML_WHEEL }}
           echo '::::: python3 -m pip install "${{ env.DIST_PACKAGE_NAME }}[dev]" --find-links=${{ env.PYCRYSFML_WHEEL }}'
           python3 -m pip install "${{ env.DIST_PACKAGE_NAME }}[dev]" --find-links=${{ env.PYCRYSFML_WHEEL }}
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}*.whl
 
       - name: Debug 2
         run: |
