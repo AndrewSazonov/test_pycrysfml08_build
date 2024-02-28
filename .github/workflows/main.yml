@@ -264,15 +264,8 @@ jobs:
         run: |
           echo '::::: python -m pip install wheel'
           python -m pip install wheel
-          echo '::::: python -m wheel tags --python-tag ${{ env.PYTHON_TAG }} --platform-tag ${{ env.PLATFORM_TAG }} ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.ORIGINAL_WHEEL_NAME }}'
-          python -m wheel tags --python-tag ${{ env.PYTHON_TAG }} --platform-tag ${{ env.PLATFORM_TAG }} ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.ORIGINAL_WHEEL_NAME }}
-          echo "::::: ls -l ${{ env.PYCRYSFML_WHEEL }}"
-          ls -l ${{ env.PYCRYSFML_WHEEL }}
-
-      - name: Delete old wheel
-        run: |
-          echo "::::: rm -rf ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.ORIGINAL_WHEEL_NAME }}"
-          rm -rf ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.ORIGINAL_WHEEL_NAME }}
+          echo '::::: python -m wheel tags --python-tag ${{ env.PYTHON_TAG }} --platform-tag ${{ env.PLATFORM_TAG }} --remove ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.ORIGINAL_WHEEL_NAME }}'
+          python -m wheel tags --python-tag ${{ env.PYTHON_TAG }} --platform-tag ${{ env.PLATFORM_TAG }} --remove ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.ORIGINAL_WHEEL_NAME }}
           echo "::::: ls -l ${{ env.PYCRYSFML_WHEEL }}"
           ls -l ${{ env.PYCRYSFML_WHEEL }}
 
