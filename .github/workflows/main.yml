@@ -180,22 +180,41 @@ jobs:
           echo '::::: ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}Databases'
           ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}Databases
 
-      - name: Make PyCrysFML python wheel
+      #- name: Make PyCrysFML python wheel
+      #  run: |
+      #    python -m pip install build
+      #    echo '::::: touch ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py'
+      #    touch ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py
+      #    echo '::::: python3 -m build --wheel --outdir ${{ env.PYCRYSFML_WHEEL }}'
+      #    python3 -m build --wheel --outdir ${{ env.PYCRYSFML_WHEEL }}
+      #    echo '::::: ls - l ${{ env.PROJECTS_DIR }}'
+      #    ls -l ${{ env.PROJECTS_DIR }}
+      #    echo '::::: ls -l ${{ env.PYCRYSFML_DIST }}'
+      #    ls -l ${{ env.PYCRYSFML_DIST }}
+      #    echo '::::: ls - l ${{ env.PYCRYSFML_WHEEL }}'
+      #    ls -l ${{ env.PYCRYSFML_WHEEL }}
+
+      - name: Copy extra files (__init__.py, pyproject.toml)
         run: |
-          python -m pip install build
-          echo '::::: touch ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py'
-          touch ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py
-          echo '::::: python3 -m build --wheel --outdir ${{ env.PYCRYSFML_WHEEL }}'
-          python3 -m build --wheel --outdir ${{ env.PYCRYSFML_WHEEL }}
-          echo '::::: ls - l ${{ env.PROJECTS_DIR }}'
-          ls -l ${{ env.PROJECTS_DIR }}
-          echo '::::: ls -l ${{ env.PYCRYSFML_DIST }}'
-          ls -l ${{ env.PYCRYSFML_DIST }}
-          echo '::::: ls - l ${{ env.PYCRYSFML_WHEEL }}'
-          ls -l ${{ env.PYCRYSFML_WHEEL }}
+          #echo '::::: touch ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py'
+          #touch ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py
+          echo '::::: cp ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
+          cp ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}__init__.py ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+          echo '::::: cp ${{ env.PROJECTS_DIR }}${{ env.SEP }}pyproject.toml ${{ env.PYCRYSFML_DIST }}'
+          cp ${{ env.PROJECTS_DIR }}${{ env.SEP }}pyproject.toml ${{ env.PYCRYSFML_DIST }}
+          echo '::::: ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
+          ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.5
+        with:
+          package-dir: ${{ env.PYCRYSFML_DIST }}
+          output-dir: ${{ env.PYCRYSFML_WHEEL }}
 
       - name: Install PyCrysFML from local wheel (with dev extras)
         run: |
+          echo "::::: ls -l ${{ env.SITE_PACKAGES }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
+          ls -l ${{ env.SITE_PACKAGES }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           echo '::::: python3 -m pip install "${{ env.DIST_PACKAGE_NAME }}[dev]" --find-links=${{ env.PYCRYSFML_WHEEL }}'
           python3 -m pip install "${{ env.DIST_PACKAGE_NAME }}[dev]" --find-links=${{ env.PYCRYSFML_WHEEL }}
 
