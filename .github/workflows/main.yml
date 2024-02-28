@@ -17,13 +17,13 @@ jobs:
         os: [ubuntu-22.04, macos-12, windows-2022]  # [ubuntu-22.04, macos-12, windows-2022]
         build_system: [cmake]  # [cmake, fpm]
         compiler: [gfortran]  # [gfortran, ifort]
-        #include:
-        #  - os: ubuntu-22.04
-        #    build_system: cmake
-        #    compiler: ifort
-        #  - os: ubuntu-22.04
-        #    build_system: cmake
-        #    compiler: ifx
+        include:
+          - os: ubuntu-22.04
+            build_system: cmake
+            compiler: ifort
+          - os: ubuntu-22.04
+            build_system: cmake
+            compiler: ifx
 
     steps:
       - name: Check-out repository
@@ -225,6 +225,7 @@ jobs:
           python3 -m pip install "${{ env.DIST_PACKAGE_NAME }}[dev]" --find-links=${{ env.PYCRYSFML_WHEEL }}
 
       - name: Upload wheel
+        if: matrix.compiler == 'gfortran'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.FIXED_WHEEL_NAME }}
