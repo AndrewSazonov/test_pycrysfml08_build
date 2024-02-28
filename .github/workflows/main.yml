@@ -215,6 +215,13 @@ jobs:
           echo '::::: ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
           ls -l ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
 
+      - name: Validate pyproject.toml
+        run: |
+          echo "::::: python -m pip install 'validate-pyproject[all]'"
+          python -m pip install 'validate-pyproject[all]'
+          echo "::::: validate-pyproject ${{ env.PROJECTS_DIR }}${{ env.SEP }}pyproject.toml"
+          validate-pyproject ${{ env.PROJECTS_DIR }}${{ env.SEP }}pyproject.toml
+
       #- name: Build PyCrysFML python wheel
       #  uses: pypa/cibuildwheel@v2.16.5
       #  env:
