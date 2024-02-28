@@ -21,6 +21,9 @@ jobs:
           - os: ubuntu-22.04
             build_system: cmake
             compiler: ifort
+          - os: ubuntu-22.04
+            build_system: cmake
+            compiler: ifx
 
     steps:
       - name: Check-out repository
@@ -75,7 +78,7 @@ jobs:
           if [[ '${{ matrix.compiler }}' == 'gfortran' ]]; then
             #echo "COMPILER_OPTIONS=-cpp -std=f2008 -ffree-line-length-none -fPIC" >> $GITHUB_ENV
             echo "COMPILER_OPTIONS=-cpp -ffree-line-length-none -fPIC" >> $GITHUB_ENV
-          elif [[ '${{ matrix.compiler }}' == 'ifort' ]]; then
+          elif [[ '${{ matrix.compiler }}' == 'ifort' || '${{ matrix.compiler }}' == 'ifx' ]]; then
             echo "COMPILER_OPTIONS=-fpp -fPIC" >> $GITHUB_ENV
           fi
 
@@ -91,8 +94,8 @@ jobs:
           #brew install llvm  # ??? OpenMP for parallel compilation in FPM
           #brew reinstall libomp  # ??? OpenMP for parallel compilation in FPM
 
-      - name: Install OS-specific dependences (Linux + ifort)
-        if: runner.os == 'Linux' && matrix.compiler == 'ifort'
+      - name: Install OS-specific dependences (Linux + ifort/ifx)
+        if: runner.os == 'Linux' && (matrix.compiler == 'ifort' || matrix.compiler == 'ifx')
         run: |
           curl -Lo- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | sudo gpg --dearmor -o /usr/share/keyrings/oneapi-archive-keyring.gpg
           sudo tee /etc/apt/sources.list.d/oneAPI.list <<< "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main"
@@ -101,6 +104,7 @@ jobs:
           source /opt/intel/oneapi/setvars.sh
           printenv >> $GITHUB_ENV
           ifort --version
+          ifx --version
 
       - name: Download CrysFML (powder_mod_fix branch)
         run: git clone --single-branch --branch powder_mod_fix https://code.ill.fr/rodriguez-carvajal/crysfml2008.git ${{ env.CRYSFML_REPO }}
