@@ -118,8 +118,8 @@ jobs:
           echo '::::: cmake --install ${{ env.CRYSFML_BUILD }}'
           cmake --install ${{ env.CRYSFML_BUILD }}
 
-      - name: Download PyCrysFML (develop branch)
-        run: git clone --single-branch --branch develop https://code.ill.fr/scientific-software/pycrysfml08.git ${{ env.PYCRYSFML_REPO }}
+      - name: Download PyCrysFML (master branch)
+        run: git clone --single-branch --branch master https://code.ill.fr/scientific-software/pycrysfml08.git ${{ env.PYCRYSFML_REPO }}
 
       - name: Copy powder_mod.f90 to PyCrysFML src folder
         run: |
