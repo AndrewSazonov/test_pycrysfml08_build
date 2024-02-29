@@ -172,9 +172,9 @@ jobs:
             echo "::::: ${{ env.FC }} /c /fpp /nologo /Warn %%n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include"
             ${{ env.FC }} /c /fpp /nologo /Warn %%n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include
             echo "::::: link %%n.obj /out:"%%n.dll" /libpath:${{ env.CRYSFML_DIST }}${{ env.SEP }}lib /dll CrysFML08.lib ${{ env.LIBPYTHON }}"
-            link %%n.obj /out:"%%n.dll" /libpath:${{ env.CRYSFML_DIST }}${{ env.SEP }}lib /dll CrysFML08.lib ${{ env.LIBPYTHON }}
-            echo "::::: move %%n.dll ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}%%n.pyd"
-            move %%n.dll ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}${{ env.SEP }}%%n.pyd
+            link %%n.obj /out:"%%n.pyd" /libpath:${{ env.CRYSFML_DIST }}${{ env.SEP }}lib /dll CrysFML08.lib ${{ env.LIBPYTHON }}
+            echo "::::: move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
+            move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           )
           echo '::::: dir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}'
           dir ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
@@ -183,12 +183,12 @@ jobs:
         if: runner.os == 'Windows'
         run: |
             cp ${{ env.Python_ROOT_DIR }}\python311.dll ${{ env.PYCRYSFML_DIST }}\${{ env.DIST_PACKAGE_NAME }}
-            cp c:\\mingw64\\bin\\libgcc_s_seh-1.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
-            cp c:\\mingw64\\bin\\libgfortran-5.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
-            cp c:\\mingw64\\bin\\libquadmath-0.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
-            cp c:\\mingw64\\bin\\libwinpthread-1.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
-            echo '::::: dir ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}'
-            ls -l ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
+            cp c:\mingw64\bin\libgcc_s_seh-1.dll ${{ env.PYCRYSFML_DIST }}\${{ env.DIST_PACKAGE_NAME }}
+            cp c:\mingw64\bin\libgfortran-5.dll ${{ env.PYCRYSFML_DIST }}\${{ env.DIST_PACKAGE_NAME }}
+            cp c:\mingw64\bin\libquadmath-0.dll ${{ env.PYCRYSFML_DIST }}\${{ env.DIST_PACKAGE_NAME }}
+            cp c:\mingw64\bin\libwinpthread-1.dll ${{ env.PYCRYSFML_DIST }}\${{ env.DIST_PACKAGE_NAME }}
+            echo '::::: dir ${{ env.PYCRYSFML_DIST }}\${{ env.DIST_PACKAGE_NAME }}'
+            ls -l ${{ env.PYCRYSFML_DIST }}\${{ env.DIST_PACKAGE_NAME }}
 
       - name: Add __init__.py
         run: |
