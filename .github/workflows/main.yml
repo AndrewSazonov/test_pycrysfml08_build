@@ -80,6 +80,7 @@ jobs:
             echo "CMAKE_GENERATOR=-G 'NMake Makefiles'" >> $GITHUB_ENV
             echo "SITE_PACKAGES=c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages" >> $GITHUB_ENV
             echo "LIBPYTHON=${{ env.Python_ROOT_DIR }}\\libs\\python311.lib" >> $GITHUB_ENV
+            echo "WIN32=1" >> $GITHUB_ENV
           fi
           if [[ '${{ env.FC }}' == 'gfortran' ]]; then
             #echo "COMPILER_OPTIONS=-cpp -std=f2008 -ffree-line-length-none -fPIC" >> $GITHUB_ENV
@@ -181,7 +182,7 @@ jobs:
       - name: Add required system DLLs (Windows)
         if: runner.os == 'Windows'
         run: |
-            cp ${{ env.Python_ROOT_DIR }}\\python311.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
+            cp ${{ env.Python_ROOT_DIR }}\python311.dll ${{ env.PYCRYSFML_DIST }}\${{ env.DIST_PACKAGE_NAME }}
             cp c:\\mingw64\\bin\\libgcc_s_seh-1.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
             cp c:\\mingw64\\bin\\libgfortran-5.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
             cp c:\\mingw64\\bin\\libquadmath-0.dll ${{ env.PYCRYSFML_DIST }}\\${{ env.DIST_PACKAGE_NAME }}
@@ -243,7 +244,7 @@ jobs:
           path: ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.FIXED_WHEEL_NAME }}
 
       - name: Debug
-        run: ls -l C:\\hostedtoolcache\\windows\\Python\\3.11.8\\x64\\Lib\\site-packages\\pycrysfml08
+        run: ls -l C:\hostedtoolcache\windows\Python\3.11.8\x64\Lib\site-packages\pycrysfml08
 
       - name: Run unit tests
         run: pytest tests/ -vv
