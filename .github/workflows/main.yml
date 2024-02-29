@@ -14,11 +14,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-12, windows-2022]  # [ubuntu-22.04, macos-12, windows-2022]
+        os: [windows-2022]  # [ubuntu-22.04, macos-12, windows-2022]
         toolchain:
-          - {compiler: gcc, version: 13}  # gfortran
+          #- {compiler: gcc, version: 13}  # gfortran
           - {compiler: intel-classic, version: '2021.10'}  # ifort
-          - {compiler: intel, version: '2023.2'}  # ifx
+          #- {compiler: intel, version: '2023.2'}  # ifx
         build_system: [cmake]  # [cmake, fpm]
         exclude:
           - os: macos-12
@@ -222,6 +222,9 @@ jobs:
         with:
           name: ${{ env.FIXED_WHEEL_NAME }}
           path: ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.FIXED_WHEEL_NAME }}
+
+      - name: Debug
+        run: ls -l C:\\hostedtoolcache\\windows\\Python\\3.11.8\\x64\\Lib\\site-packages\\pycrysfml08
 
       - name: Run unit tests
         run: pytest tests/ -vv
