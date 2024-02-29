@@ -14,11 +14,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-12, windows-2022]  # [ubuntu-22.04, macos-12, windows-2022]
+        os: [windows-2022]  # [ubuntu-22.04, macos-12, windows-2022]
         toolchain:
-          - {compiler: gcc, version: 13}  # gfortran
+          #- {compiler: gcc, version: 13}  # gfortran
           - {compiler: intel-classic, version: '2021.10'}  # ifort
-          - {compiler: intel, version: '2023.2'}  # ifx
+          #- {compiler: intel, version: '2023.2'}  # ifx
         build_system: [cmake]  # [cmake, fpm]
         exclude:
           - os: macos-12
@@ -133,8 +133,8 @@ jobs:
           for n in py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom powder_mod; do
             echo "::::: ${{ env.FC }} ${{ env.COMPILER_OPTIONS }} -c $n.F90 -I ${{ env.CRYSFML_DIST }}/include"
             ${{ env.FC }} ${{ env.COMPILER_OPTIONS }} -c $n.F90 -I ${{ env.CRYSFML_DIST }}/include
-            echo "::::: ${{ env.FC }} -shared -o $n.o $n.so -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
-            ${{ env.FC }} -shared -o $n.o $n.so -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
+            echo "::::: ${{ env.FC }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
+            ${{ env.FC }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
             echo "::::: mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
             mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           done
@@ -152,8 +152,8 @@ jobs:
           for %%n in (py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom powder_mod) do (
             echo "::::: ${{ env.FC }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include"
             ${{ env.FC }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include
-            echo "::::: ${{ env.FC }} -shared -o %%n.o %%n.pyd -L ${{ env.CRYSFML_DIST }}${{ env.SEP }}lib -l CrysFML08 ${{ env.LIBPYTHON }}"
-            ${{ env.FC }} -shared -o %%n.o %%n.pyd -L ${{ env.CRYSFML_DIST }}${{ env.SEP }}lib -l CrysFML08 ${{ env.LIBPYTHON }}
+            echo "::::: ${{ env.FC }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}${{ env.SEP }}lib -l CrysFML08 ${{ env.LIBPYTHON }}"
+            ${{ env.FC }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}${{ env.SEP }}lib -l CrysFML08 ${{ env.LIBPYTHON }}
             echo "::::: move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
             move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           )
