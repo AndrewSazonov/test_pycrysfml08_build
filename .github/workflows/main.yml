@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2022]  # [ubuntu-22.04, macos-12, windows-2022]
+        os: [ubuntu-22.04, macos-12, windows-2022]  # [ubuntu-22.04, macos-12, windows-2022]
         toolchain:
           - {compiler: gcc, version: 13}  # gfortran
           - {compiler: intel-classic, version: '2021.10'}  # ifort
