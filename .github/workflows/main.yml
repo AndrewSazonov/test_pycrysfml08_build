@@ -20,6 +20,10 @@ jobs:
           - {compiler: intel, version: '2023.2'}  # ifort
           - {compiler: intel-classic, version: '2021.10'}  # ifx
         build_system: [cmake]  # [cmake, fpm]
+        exclude:
+          - os: macos-12
+            toolchain: {compiler: intel, version: '2023.2'}  # ifx not supported
+
         #compiler: [gfortran, ifort, ifx]  # [gfortran, ifort]
         #include:
         #  - os: ubuntu-22.04
@@ -48,9 +52,9 @@ jobs:
           compiler: ${{ matrix.toolchain.compiler }}
           version: ${{ matrix.toolchain.version }}
 
-      #- name: Set up nmake (Windows)
-      #  if: runner.os == 'Windows'
-      #  uses: ilammy/msvc-dev-cmd@v1
+      - name: Set up nmake (Windows)
+        if: runner.os == 'Windows' && (env.FC == 'ifort' || env.FC == 'ifx')
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Declare env variables (independent)
         shell: bash
@@ -101,6 +105,7 @@ jobs:
           echo "FIXED_WHEEL_NAME=${{ env.DIST_PACKAGE_NAME }}-${{ env.DIST_PACKAGE_VERSION }}-${{ env.PYTHON_TAG }}-none-${{ env.PLATFORM_TAG }}.whl" >> $GITHUB_ENV
 
       - name: Debug
+        shell: bash
         run: |
           echo '::::: python --version'
           python --version
