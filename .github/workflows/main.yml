@@ -41,6 +41,17 @@ jobs:
       - name: Upgrade PIP
         run: python -m pip install --upgrade pip
 
+      - name: Set up fortran
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: ${{ matrix.toolchain.compiler }}
+          version: ${{ matrix.toolchain.version }}
+
+      #- name: Set up nmake (Windows)
+      #  if: runner.os == 'Windows'
+      #  uses: ilammy/msvc-dev-cmd@v1
+
       - name: Declare env variables (independent)
         shell: bash
         run: |
@@ -69,10 +80,10 @@ jobs:
             echo "SITE_PACKAGES=c:/hostedtoolcache/windows/python/3.11.8/x64/lib/site-packages" >> $GITHUB_ENV
             echo "LIBPYTHON=${{ env.Python_ROOT_DIR }}\\libs\\python311.lib" >> $GITHUB_ENV
           fi
-          if [[ '${{ steps.setup-fortran.outputs.fc }}' == 'gfortran' ]]; then
+          if [[ '${{ env.FC }}' == 'gfortran' ]]; then
             #echo "COMPILER_OPTIONS=-cpp -std=f2008 -ffree-line-length-none -fPIC" >> $GITHUB_ENV
             echo "COMPILER_OPTIONS=-cpp -ffree-line-length-none -fPIC" >> $GITHUB_ENV
-          elif [[ '${{ steps.setup-fortran.outputs.fc }}' == 'ifort' || '${{ steps.setup-fortran.outputs.fc }}' == 'ifx' ]]; then
+          elif [[ '${{ env.FC }}' == 'ifort' || '${{ env.FC }}' == 'ifx' ]]; then
             echo "COMPILER_OPTIONS=-fpp -fPIC" >> $GITHUB_ENV
           fi
 
@@ -89,23 +100,12 @@ jobs:
           echo "ORIGINAL_WHEEL_NAME=${{ env.DIST_PACKAGE_NAME }}-${{ env.DIST_PACKAGE_VERSION }}-py3-none-any.whl" >> $GITHUB_ENV
           echo "FIXED_WHEEL_NAME=${{ env.DIST_PACKAGE_NAME }}-${{ env.DIST_PACKAGE_VERSION }}-${{ env.PYTHON_TAG }}-none-${{ env.PLATFORM_TAG }}.whl" >> $GITHUB_ENV
 
-      - name: Set up nmake (Windows)
-        if: runner.os == 'Windows'
-        uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Set up fortran
-        uses: fortran-lang/setup-fortran@v1
-        id: setup-fortran
-        with:
-          compiler: ${{ matrix.toolchain.compiler }}
-          version: ${{ matrix.toolchain.version }}
-
       - name: Debug
         run: |
           echo '::::: python --version'
           python --version
-          echo '::::: ${{ steps.setup-fortran.outputs.fc }} --version'
-          ${{ steps.setup-fortran.outputs.fc }} --version
+          echo '::::: ${{ env.FC }} --version'
+          ${{ env.FC }} --version
 
       #- name: Install OS-specific dependences (macOS + gfortran)
       #  if: runner.os == 'macOS' && matrix.compiler == 'gfortran'
@@ -132,8 +132,8 @@ jobs:
 
       - name: Build CrysFML using CMake
         run: |
-          echo '::::: cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_POSITION_INDEPENDENT_CODE=ON -D CMAKE_Fortran_COMPILER=${{ steps.setup-fortran.outputs.fc }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}'
-          cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_POSITION_INDEPENDENT_CODE=ON -D CMAKE_Fortran_COMPILER=${{ steps.setup-fortran.outputs.fc }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}
+          echo '::::: cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_POSITION_INDEPENDENT_CODE=ON -D CMAKE_Fortran_COMPILER=${{ env.FC }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}'
+          cmake ${{ env.CMAKE_GENERATOR }} -D ARCH32=OFF -D PYTHON_API=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_POSITION_INDEPENDENT_CODE=ON -D CMAKE_Fortran_COMPILER=${{ env.FC }} -D CMAKE_INSTALL_PREFIX=${{ env.CRYSFML_DIST }} -S ${{ env.CRYSFML_REPO }} -B ${{ env.CRYSFML_BUILD }}
           echo '::::: cmake --build ${{ env.CRYSFML_BUILD }} --parallel'
           cmake --build ${{ env.CRYSFML_BUILD }} --parallel
           echo '::::: cmake --install ${{ env.CRYSFML_BUILD }}'
@@ -156,10 +156,10 @@ jobs:
           cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src
           #for n in py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom powder_mod; do
           for n in py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom powder_mod; do
-            echo "::::: ${{ steps.setup-fortran.outputs.fc }} ${{ env.COMPILER_OPTIONS }} -c $n.F90 -I ${{ env.CRYSFML_DIST }}/include"
-            ${{ steps.setup-fortran.outputs.fc }} ${{ env.COMPILER_OPTIONS }} -c $n.F90 -I ${{ env.CRYSFML_DIST }}/include
-            echo "::::: ${{ steps.setup-fortran.outputs.fc }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
-            ${{ steps.setup-fortran.outputs.fc }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
+            echo "::::: ${{ env.FC }} ${{ env.COMPILER_OPTIONS }} -c $n.F90 -I ${{ env.CRYSFML_DIST }}/include"
+            ${{ env.FC }} ${{ env.COMPILER_OPTIONS }} -c $n.F90 -I ${{ env.CRYSFML_DIST }}/include
+            echo "::::: ${{ env.FC }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
+            ${{ env.FC }} -shared -o $n.so $n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
             echo "::::: mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
             mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           done
@@ -175,10 +175,10 @@ jobs:
           echo '::::: cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src'
           cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src
           for %%n in (py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom powder_mod) do (
-            echo "::::: ${{ steps.setup-fortran.outputs.fc }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}/include"
-            ${{ steps.setup-fortran.outputs.fc }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}/include
-            echo "::::: ${{ steps.setup-fortran.outputs.fc }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
-            ${{ steps.setup-fortran.outputs.fc }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
+            echo "::::: ${{ env.FC }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}/include"
+            ${{ env.FC }} ${{ env.COMPILER_OPTIONS }} -c %%n.f90 -I ${{ env.CRYSFML_DIST }}/include
+            echo "::::: ${{ env.FC }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
+            ${{ env.FC }} -shared -o %%n.pyd %%n.o -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
             echo "::::: move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
             move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           )
