@@ -37,14 +37,6 @@ jobs:
       - name: Check-out repository
         uses: actions/checkout@v3
 
-      - name: Set up Python environment
-        uses: actions/setup-python@v4
-        with:
-            python-version: 3.11
-
-      - name: Upgrade PIP
-        run: python -m pip install --upgrade pip
-
       - name: Set up fortran
         uses: fortran-lang/setup-fortran@v1
         id: setup-fortran
@@ -55,6 +47,14 @@ jobs:
       - name: Set up nmake (Windows)
         if: runner.os == 'Windows' && (env.FC == 'ifort' || env.FC == 'ifx')
         uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Set up Python environment
+        uses: actions/setup-python@v4
+        with:
+            python-version: 3.11
+
+      - name: Upgrade PIP
+        run: python -m pip install --upgrade pip
 
       - name: Declare env variables (independent)
         shell: bash
@@ -109,8 +109,6 @@ jobs:
         run: |
           echo '::::: python --version'
           python --version
-          echo '::::: ${{ env.FC }} --version'
-          ${{ env.FC }} --version
 
       #- name: Install OS-specific dependences (macOS + gfortran)
       #  if: runner.os == 'macOS' && matrix.compiler == 'gfortran'
