@@ -37,6 +37,9 @@ jobs:
         if: runner.os == 'Windows' && matrix.toolchain.compiler == 'gcc'  # let's use pre-installed gfortran
         run: echo "FC=gfortran" >> $GITHUB_ENV
 
+      - name: Debug
+        run: echo "===${{ env.FC }}==="
+
       - name: Set up nmake (Windows)
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
