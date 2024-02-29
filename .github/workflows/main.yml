@@ -35,10 +35,8 @@ jobs:
 
       - name: Set up fortran (Windows + gfortran)
         if: runner.os == 'Windows' && matrix.toolchain.compiler == 'gcc'  # let's use pre-installed gfortran
+        shell: bash
         run: echo "FC=gfortran" >> $GITHUB_ENV
-
-      - name: Debug
-        run: echo "===${{ env.FC }}==="
 
       - name: Set up nmake (Windows)
         if: runner.os == 'Windows'
