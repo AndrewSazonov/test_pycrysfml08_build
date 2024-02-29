@@ -86,7 +86,11 @@ jobs:
             #echo "COMPILER_OPTIONS=-cpp -std=f2008 -ffree-line-length-none -fPIC" >> $GITHUB_ENV
             echo "COMPILER_OPTIONS=-cpp -ffree-line-length-none -fPIC" >> $GITHUB_ENV
           elif [[ '${{ env.FC }}' == 'ifort' || '${{ env.FC }}' == 'ifx' ]]; then
-            echo "COMPILER_OPTIONS=-fpp -fPIC" >> $GITHUB_ENV
+            if [[ '${{ runner.os }}' == 'Windows' ]]; then
+              echo "COMPILER_OPTIONS=/c /fpp /nologo /Warn" >> $GITHUB_ENV
+            elif [[ '${{ runner.os }}' == 'Linux' || '${{ runner.os }}' == 'macOS' ]]; then
+              echo "COMPILER_OPTIONS=-fpp -fPIC" >> $GITHUB_ENV
+            fi
           fi
 
       - name: Declare env variables (dependent)
@@ -133,8 +137,8 @@ jobs:
           for n in py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom powder_mod; do
             echo "::::: ${{ env.FC }} ${{ env.COMPILER_OPTIONS }} -c $n.F90 -I ${{ env.CRYSFML_DIST }}/include"
             ${{ env.FC }} ${{ env.COMPILER_OPTIONS }} -c $n.F90 -I ${{ env.CRYSFML_DIST }}/include
-            echo "::::: ${{ env.FC }} -shared  $n.o -o $n.so -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
-            ${{ env.FC }} -shared  $n.o -o $n.so -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
+            echo "::::: ${{ env.FC }} -shared $n.o -o $n.so -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}"
+            ${{ env.FC }} -shared $n.o -o $n.so -L ${{ env.CRYSFML_DIST }}/lib -l CrysFML08 ${{ env.LIBPYTHON }}
             echo "::::: mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
             mv $n.so ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}
           done
@@ -169,8 +173,8 @@ jobs:
           echo '::::: cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src'
           cd ${{ env.PYCRYSFML_REPO }}${{ env.SEP }}src
           for %%n in (py_cfml_metrics py_cfml_profiles py_cfml_sxtal_geom powder_mod) do (
-            echo "::::: ${{ env.FC }} /c /fpp /nologo /Warn %%n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include"
-            ${{ env.FC }} /c /fpp /nologo /Warn %%n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include
+            echo "::::: ${{ env.FC }} ${{ env.COMPILER_OPTIONS }} %%n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include"
+            ${{ env.FC }} ${{ env.COMPILER_OPTIONS }} %%n.f90 -I ${{ env.CRYSFML_DIST }}${{ env.SEP }}include
             echo "::::: link %%n.obj /out:"%%n.dll" /libpath:${{ env.CRYSFML_DIST }}${{ env.SEP }}lib /dll CrysFML08.lib ${{ env.LIBPYTHON }}"
             link %%n.obj /out:"%%n.pyd" /libpath:${{ env.CRYSFML_DIST }}${{ env.SEP }}lib /dll CrysFML08.lib ${{ env.LIBPYTHON }}
             echo "::::: move %%n.pyd ${{ env.PYCRYSFML_DIST }}${{ env.SEP }}${{ env.DIST_PACKAGE_NAME }}"
@@ -243,8 +247,8 @@ jobs:
           name: ${{ env.FIXED_WHEEL_NAME }}
           path: ${{ env.PYCRYSFML_WHEEL }}${{ env.SEP }}${{ env.FIXED_WHEEL_NAME }}
 
-      - name: Debug
-        run: ls -l C:\hostedtoolcache\windows\Python\3.11.8\x64\Lib\site-packages\pycrysfml08
+      #- name: Debug
+      #  run: ls -l C:\hostedtoolcache\windows\Python\3.11.8\x64\Lib\site-packages\pycrysfml08
 
       - name: Run unit tests
         run: pytest tests/ -vv
